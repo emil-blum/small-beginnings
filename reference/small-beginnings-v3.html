@@ -1,0 +1,513 @@
+<title>Small Beginnings 3</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@600;700&family=Albert+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+<style>
+/* Layout: one kitchen, three rooms behind a bottom nav. Today (what you hold), Kitchen (sink of dishes + windowsill of herbs), Week (ledger). Lists of roomy rows, not squeezed grids. */
+:root{
+  --ground:#E6ECE5; --surface:#F6F8F4; --raised:#FFFFFF; --ink:#1E2923; --muted:#5E6C63; --faint:#8A978E; --line:#D2DAD1;
+  --glaze:#FCFDFA; --rim:#D5DDD4; --crust:#94672C; --crust2:#6E4A1C;
+  --herb:#4C7A49; --herb2:#BBD0B2; --soil:#E9E2D6; --accent:#2F5D57; --onaccent:#F7F9F5; --scrim:rgba(20,28,24,.42);
+  --f-display:"Shippori Mincho","Iowan Old Style",Georgia,serif;
+  --f-body:"Albert Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px;
+  --navh:68px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#111714; --surface:#19211D; --raised:#212B26; --ink:#E4EBE4; --muted:#9AA99F; --faint:#6F7E74; --line:#2D3832;
+  --glaze:#2C3630; --rim:#3A463F; --crust:#C08A45; --crust2:#8E6128;
+  --herb:#8DBB86; --herb2:#38523A; --soil:#2A2722; --accent:#86C2B8; --onaccent:#111714; --scrim:rgba(0,0,0,.6); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ground:#111714; --surface:#19211D; --raised:#212B26; --ink:#E4EBE4; --muted:#9AA99F; --faint:#6F7E74; --line:#2D3832;
+  --glaze:#2C3630; --rim:#3A463F; --crust:#C08A45; --crust2:#8E6128;
+  --herb:#8DBB86; --herb2:#38523A; --soil:#2A2722; --accent:#86C2B8; --onaccent:#111714; --scrim:rgba(0,0,0,.6); color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font:15px/1.5 var(--f-body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:var(--s5) calc(var(--navh) + var(--s7) + env(safe-area-inset-bottom,0px))}
+button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+button:disabled{cursor:default;opacity:.4}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+svg.lucide{width:18px;height:18px;stroke-width:1.75;flex:none}
+
+/* type: 4 styles only */
+.title{font:700 32px/1.1 var(--f-display);margin:0;text-wrap:balance}
+.h{font:600 17px/1.3 var(--f-body);margin:0;overflow-wrap:anywhere}
+.meta{font-size:13.5px;line-height:1.45;color:var(--muted)}
+.eyebrow{font:500 11px/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+
+.view{max-width:640px;margin:0 auto;display:grid;gap:var(--s6)}
+.view[hidden]{display:none!important}
+.vhead{display:grid;gap:var(--s2)}
+.vhead p{margin:0;max-width:52ch}
+.sect{display:grid;gap:var(--s4)}
+.secthead{display:flex;align-items:center;justify-content:space-between;gap:var(--s3)}
+.secthead .eyebrow b{color:var(--muted);font-weight:500}
+.list{display:grid;gap:var(--s3)}
+
+/* item row */
+.row{display:grid;grid-template-columns:auto 1fr;gap:var(--s4);align-items:start;background:var(--surface);border-radius:18px;padding:var(--s4)}
+.row canvas{display:block;border-radius:50%}
+.body{display:grid;gap:var(--s2);min-width:0}
+.facts{display:flex;flex-wrap:wrap;gap:var(--s1) var(--s3);align-items:center}
+.who{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+.who svg.lucide{width:14px;height:14px}
+.state{font-size:13px;font-weight:600}
+.state.left{color:var(--crust)} .state.due{color:var(--herb)} .state.rest{color:var(--faint);font-weight:500}
+.ex{font-size:12px;color:var(--faint);font-style:italic}
+.actions{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s2);margin-top:var(--s1)}
+.btn{display:inline-flex;align-items:center;gap:var(--s2);border-radius:99px;padding:9px 16px;font-size:14px;font-weight:600;border:1px solid transparent}
+.btn.primary{background:var(--accent);color:var(--onaccent)}
+.btn.quiet{background:transparent;border-color:var(--line);color:var(--ink)}
+.btn.done{background:transparent;border-color:var(--herb);color:var(--herb)}
+.btn.text{background:transparent;color:var(--muted);padding:9px 8px;font-weight:500}
+.icon{width:40px;height:40px;display:inline-grid;place-items:center;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--ink)}
+.icon.solid{background:var(--accent);border-color:var(--accent);color:var(--onaccent)}
+.kitchenrow{grid-template-columns:auto 1fr auto;align-items:center}
+.kitchenrow .side{display:flex;gap:var(--s2)}
+
+/* today */
+.cap{display:flex;align-items:center;justify-content:space-between;gap:var(--s4);background:var(--surface);border-radius:18px;padding:var(--s3) var(--s4)}
+.stepper{display:flex;align-items:center;gap:var(--s3)}
+.stepper b{min-width:2ch;text-align:center;font:500 18px var(--f-mono)}
+.slot{display:grid;grid-template-columns:auto 1fr;gap:var(--s4);align-items:center;border:1.5px dashed var(--line);border-radius:18px;padding:var(--s4)}
+.slot .o{width:72px;height:72px;border-radius:50%;border:1.5px dashed var(--line)}
+.note{margin:0;color:var(--muted);max-width:52ch}
+.empty{color:var(--muted);background:var(--surface);border-radius:18px;padding:var(--s5) var(--s4);margin:0}
+
+/* week */
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:var(--s2);background:var(--surface);border-radius:18px;padding:var(--s4)}
+.day{display:grid;justify-items:center;gap:var(--s2)}
+.day .dot{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font:500 12px var(--f-mono);background:var(--raised);color:var(--muted)}
+.day .dot.on{background:var(--accent);color:var(--onaccent)}
+.day.today .eyebrow{color:var(--ink)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:var(--s3)}
+.stat{background:var(--surface);border-radius:18px;padding:var(--s4);display:grid;gap:var(--s2)}
+.stat b{font:500 28px/1.1 var(--f-mono);font-variant-numeric:tabular-nums}
+.stat b.word{font:700 26px/1.1 var(--f-display)}
+.backup{display:grid;gap:var(--s3);background:var(--surface);border-radius:18px;padding:var(--s4)}
+textarea{font:13px/1.4 var(--f-mono);color:var(--ink);background:var(--raised);border:1px solid var(--line);border-radius:12px;padding:var(--s3);width:100%;min-height:90px;resize:vertical}
+
+/* bottom nav */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);
+  padding:var(--s2) max(16px,env(safe-area-inset-right,0px)) calc(var(--s2) + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+nav.tabs .in{max-width:640px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s2)}
+nav.tabs button{border:0;background:transparent;display:grid;justify-items:center;gap:4px;padding:var(--s2) 0;border-radius:14px;color:var(--faint);font-size:12px;font-weight:600}
+nav.tabs button[aria-current="page"]{color:var(--ink);background:var(--raised)}
+nav.tabs svg.lucide{width:22px;height:22px}
+
+/* sheets */
+.scrim{position:fixed;inset:0;background:var(--scrim);z-index:40;display:grid;align-items:end;justify-items:center}
+.scrim[hidden]{display:none!important}
+.sheet{width:100%;max-width:640px;background:var(--surface);border-radius:24px 24px 0 0;
+  padding:var(--s5) max(20px,env(safe-area-inset-right,0px)) calc(var(--s5) + env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px));display:grid;gap:var(--s5);max-height:92vh;overflow:auto}
+.sheethead{display:flex;justify-content:space-between;align-items:center;gap:var(--s3)}
+.field{display:grid;gap:var(--s2)}
+input,select{font:inherit;font-size:16px;color:var(--ink);background:var(--raised);border:1px solid var(--line);border-radius:12px;padding:12px 14px;width:100%;min-width:0}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;background:var(--raised);border:1px solid var(--line);border-radius:12px;padding:3px;gap:3px}
+.seg button{border:0;background:transparent;border-radius:9px;padding:10px 8px;font-size:14px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:6px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--onaccent)}
+.seg.wrap{grid-auto-flow:row;grid-template-columns:repeat(2,1fr)}
+.sheet .btn.primary{justify-content:center;padding:14px}
+.hint{margin:0;font-size:13.5px;color:var(--muted)}
+.danger{background:var(--crust);color:var(--onaccent)}
+@media (prefers-reduced-motion:no-preference){.sheet{animation:up .22s ease-out}@keyframes up{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}}}
+</style>
+
+<main>
+  <!-- TODAY -->
+  <section class="view" id="v-today" aria-labelledby="t-today">
+    <div class="vhead">
+      <div class="eyebrow" id="date"></div>
+      <h1 class="title" id="t-today">Today</h1>
+      <p class="meta">Meet the difficult while it is easy. Meet the big while it is small.</p>
+    </div>
+    <div class="cap">
+      <div><div class="h">Room for today</div><div class="meta">How much you can hold, honestly.</div></div>
+      <div class="stepper">
+        <button class="icon" id="minus" type="button" aria-label="Room for one fewer"><i data-lucide="minus"></i></button>
+        <b id="capn">3</b>
+        <button class="icon" id="plus" type="button" aria-label="Room for one more"><i data-lucide="plus"></i></button>
+      </div>
+    </div>
+    <div class="list" id="todayList"></div>
+    <p class="note" id="todayNote"></p>
+  </section>
+
+  <!-- KITCHEN -->
+  <section class="view" id="v-kitchen" aria-labelledby="t-kitchen" hidden>
+    <div class="vhead">
+      <div class="eyebrow">Everything waiting</div>
+      <h1 class="title" id="t-kitchen">Kitchen</h1>
+      <p class="meta">Dishes sit in the sink and harden the longer they wait. Herbs live on the windowsill and grow a ring each time you water them.</p>
+    </div>
+    <div class="sect">
+      <div class="secthead"><div class="eyebrow">The sink <b id="sinkN"></b></div>
+        <button class="btn quiet" type="button" data-add="dish"><i data-lucide="plus"></i>Dish</button></div>
+      <div class="list" id="sink"></div>
+    </div>
+    <div class="sect">
+      <div class="secthead"><div class="eyebrow">The windowsill <b id="sillN"></b></div>
+        <button class="btn quiet" type="button" data-add="seed"><i data-lucide="plus"></i>Herb</button></div>
+      <div class="list" id="sill"></div>
+    </div>
+  </section>
+
+  <!-- WEEK -->
+  <section class="view" id="v-week" aria-labelledby="t-week" hidden>
+    <div class="vhead">
+      <div class="eyebrow">The last 7 days</div>
+      <h1 class="title" id="t-week">Week</h1>
+    </div>
+    <div class="days" id="days"></div>
+    <div class="stats" id="stats"></div>
+    <div class="backup">
+      <div><div class="h">Backup</div><p class="hint">Copy everything as text to keep somewhere safe, or paste a backup to restore it. Useful when this moves to your phone.</p></div>
+      <div class="actions">
+        <button class="btn quiet" type="button" id="copyBk"><i data-lucide="copy"></i>Copy backup</button>
+        <button class="btn quiet" type="button" id="showRestore"><i data-lucide="upload"></i>Restore</button>
+      </div>
+      <div id="restoreBox" class="field" hidden>
+        <label class="eyebrow" for="restoreTxt">Paste a backup</label>
+        <textarea id="restoreTxt"></textarea>
+        <div class="actions"><button class="btn primary" type="button" id="doRestore">Restore these items</button><span class="meta" id="restoreMsg"></span></div>
+      </div>
+      <textarea id="bkFallback" readonly hidden aria-label="Backup text"></textarea>
+    </div>
+    <div class="meta" id="status"></div>
+  </section>
+</main>
+
+<nav class="tabs" aria-label="Views"><div class="in">
+  <button type="button" data-view="today"><i data-lucide="sun"></i>Today</button>
+  <button type="button" data-view="kitchen"><i data-lucide="cooking-pot"></i>Kitchen</button>
+  <button type="button" data-view="week"><i data-lucide="calendar-range"></i>Week</button>
+</div></nav>
+
+<!-- add sheet -->
+<div class="scrim" id="addScrim" hidden>
+  <form class="sheet" id="addForm" role="dialog" aria-modal="true" aria-labelledby="addTitle">
+    <div class="sheethead"><h2 class="title" style="font-size:26px" id="addTitle">Add a dish</h2>
+      <button class="icon" type="button" id="addClose" aria-label="Close"><i data-lucide="x"></i></button></div>
+    <div class="seg" role="group" aria-label="Kind">
+      <button type="button" id="kDish" aria-pressed="true">Dish</button>
+      <button type="button" id="kSeed" aria-pressed="false">Herb</button>
+    </div>
+    <p class="hint" id="kindHint"></p>
+    <div class="field"><label class="eyebrow" for="fName">What is it</label><input id="fName" maxlength="80" required autocomplete="off"></div>
+    <div class="field" id="fMinsF"><label class="eyebrow" for="fMins">Minutes if done today</label><input id="fMins" type="number" min="1" max="240" value="10" inputmode="numeric"></div>
+    <div class="field" id="fRhythmF" hidden><span class="eyebrow">How often</span>
+      <div class="seg wrap" role="group" aria-label="How often" id="fRhythm">
+        <button type="button" data-r="1" aria-pressed="true">Every day</button>
+        <button type="button" data-r="2" aria-pressed="false">Every other day</button>
+        <button type="button" data-r="3" aria-pressed="false">Twice a week</button>
+        <button type="button" data-r="7" aria-pressed="false">Once a week</button>
+      </div></div>
+    <div class="field"><span class="eyebrow">Who it helps</span>
+      <div class="seg wrap" role="group" aria-label="Who it helps" id="fWho">
+        <button type="button" data-w="Family" aria-pressed="true"><i data-lucide="heart"></i>Family</button>
+        <button type="button" data-w="Others" aria-pressed="false"><i data-lucide="users"></i>Others</button>
+        <button type="button" data-w="Clients" aria-pressed="false"><i data-lucide="briefcase"></i>Clients</button>
+        <button type="button" data-w="Me" aria-pressed="false"><i data-lucide="user"></i>Me</button>
+      </div></div>
+    <button class="btn primary" type="submit" id="addSubmit">Put it in the sink</button>
+  </form>
+</div>
+
+<!-- confirm sheet -->
+<div class="scrim" id="cfScrim" hidden>
+  <div class="sheet" role="alertdialog" aria-modal="true" aria-labelledby="cfTitle" aria-describedby="cfText">
+    <div class="sheethead"><h2 class="title" style="font-size:24px" id="cfTitle">Remove this?</h2></div>
+    <p class="hint" id="cfText"></p>
+    <div class="actions" style="justify-content:flex-end">
+      <button class="btn quiet" type="button" id="cfNo">Keep it</button>
+      <button class="btn danger" type="button" id="cfYes"><i data-lucide="trash-2"></i>Remove for good</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+const GROW=1.3, WHO={Family:"heart",Others:"users",Clients:"briefcase",Me:"user"}, RHYTHM={1:"every day",2:"every other day",3:"twice a week",7:"once a week"};
+const $=s=>document.getElementById(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const dkey=d=>{const z=n=>String(n).padStart(2,"0");return d.getFullYear()+"-"+z(d.getMonth()+1)+"-"+z(d.getDate())};
+const TODAY=dkey(new Date());
+const daysBetween=(a,b)=>Math.round((new Date(b+"T12:00")-new Date(a+"T12:00"))/864e5);
+const addDays=(k,n)=>{const d=new Date(k+"T12:00");d.setDate(d.getDate()+n);return dkey(d)};
+const uid=()=>Math.random().toString(36).slice(2,10)+Date.now().toString(36);
+const ls={get(k,f){try{const v=localStorage.getItem(k);return v==null?f:JSON.parse(v)}catch(e){return f}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+$("date").textContent=new Date().toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"});
+const icons=()=>{try{window.lucide&&lucide.createIcons({icons:lucide.icons})}catch(e){}};
+
+let items=[], plan={day:TODAY,ids:[],cap:3}, store;
+
+/* ---------- storage ---------- */
+const local={
+  load(){items=ls.get("sb3-items",[]);plan=ls.get("sb3-plan",plan);render()},
+  async put(it){const i=items.findIndex(x=>x.id===it.id);i<0?items.push(it):items[i]=it;ls.set("sb3-items",items);render()},
+  async del(id){items=items.filter(x=>x.id!==id);ls.set("sb3-items",items);render()},
+  async putPlan(p){plan=p;ls.set("sb3-plan",p);render()}
+};
+async function boot(){
+  store=local;local.load();$("status").textContent="Loading…";
+  const [db,user]=window.claude&&claude.use?await Promise.all([claude.use("db"),claude.use("user")]):[null,null];
+  const id=user?await user.id():null;
+  if(!db||!id){$("status").textContent="Saved in this browser only.";return}
+  const col=db.collection("data/users/"+id);
+  const t=setTimeout(()=>{$("status").textContent="Can't reach your saved kitchen yet."},10000);
+  col.onSnapshot(snap=>{
+    if(!snap.metadata.fromCache){clearTimeout(t);$("status").textContent="Saved privately to your account."}
+    store={
+      async put(it){const {id:k,...rest}=it;await col.doc(k).set(rest)},
+      async del(k){await col.doc(k).delete()},
+      async putPlan(p){plan=p;render();await col.doc("_today").set(p)}
+    };
+    items=[];snap.docs.forEach(d=>{d.id==="_today"?plan=d.data():items.push({id:d.id,...d.data()})});
+    render();
+  },()=>{clearTimeout(t);$("status").textContent="Saved in this browser only.";store=local;local.load()});
+}
+
+/* ---------- model ---------- */
+function today(){
+  const cap=plan.cap||3;if(plan.day!==TODAY)return {day:TODAY,ids:[],cap};
+  const live=new Set(items.map(i=>i.id));return {day:TODAY,ids:(plan.ids||[]).filter(i=>live.has(i)),cap};
+}
+const isDone=it=>it.kind==="dish"?it.done===TODAY:(it.tended||[]).includes(TODAY);
+function dishMins(it){const age=Math.max(0,daysBetween(it.created,TODAY));return {age,now:Math.round(it.mins*Math.pow(GROW,age)),wk:Math.round(it.mins*Math.pow(GROW,age+7))}}
+function herbState(it){
+  const r=+it.rhythm||1,t=(it.tended||[]).slice().sort(),last=t[t.length-1];
+  const since=last?daysBetween(last,TODAY):daysBetween(it.created,TODAY)+r;
+  return {r,since,due:since>=r&&!t.includes(TODAY)};
+}
+function herbRings(it){
+  const r=+it.rhythm||1,t=new Set(it.tended||[]),out=[];let anchor=addDays(it.created,-r);
+  for(let i=0;i<=daysBetween(it.created,TODAY);i++){
+    const d=addDays(it.created,i);
+    if(t.has(d)){out.push(1);anchor=d;continue}
+    if(d===TODAY)continue;
+    const g=daysBetween(anchor,d);if(g>=2*r&&g%r===0)out.push(0);
+  }
+  return out;
+}
+
+/* ---------- drawing ---------- */
+function rng(seed){let h=1779033703;for(const c of seed)h=Math.imul(h^c.charCodeAt(0),3432918353),h=h<<13|h>>>19;return()=>{h=Math.imul(h^h>>>16,2246822507);h=Math.imul(h^h>>>13,3266489909);return((h^=h>>>16)>>>0)/4294967296}}
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function ctx(size){const cv=document.createElement("canvas");cv.setAttribute("aria-hidden","true");const dpr=Math.min(3,window.devicePixelRatio||1);cv.width=size*dpr;cv.height=size*dpr;cv.style.width=cv.style.height=size+"px";const c=cv.getContext("2d");c.scale(dpr*size/150,dpr*size/150);return [cv,c]}
+function drawDish(it,size){
+  const [cv,c]=ctx(size);
+  c.fillStyle=css("--rim");c.beginPath();c.arc(75,75,74,0,7);c.fill();
+  c.fillStyle=css("--glaze");c.beginPath();c.arc(75,74,71,0,7);c.fill();
+  c.strokeStyle=css("--line");c.lineWidth=1.5;c.beginPath();c.arc(75,74,50,0,7);c.stroke();
+  if(it.done===TODAY){c.strokeStyle=css("--herb");c.lineWidth=7;c.lineCap="round";c.lineJoin="round";c.beginPath();c.moveTo(52,76);c.lineTo(68,92);c.lineTo(99,59);c.stroke();return cv}
+  const r=rng(it.id),n=Math.min(Math.max(0,daysBetween(it.created,TODAY)),12);
+  for(let k=0;k<n*14;k++){
+    const a=r()*6.283,dist=r()*(18+n*3.2),rad=2.4+r()*(3+n*1.2);
+    c.globalAlpha=Math.min(.78,.2+n*.045)*(.5+r()*.5);
+    c.fillStyle=r()<.35?css("--crust2"):css("--crust");
+    c.beginPath();c.ellipse(75+Math.cos(a)*dist,74+Math.sin(a)*dist,rad,rad*(.5+r()*.6),r()*3,0,7);c.fill();
+  }
+  c.globalAlpha=1;return cv;
+}
+function drawHerb(it,size){
+  const [cv,c]=ctx(size),r=rng(it.id),rings=herbRings(it).slice(-30),now=(it.tended||[]).includes(TODAY);
+  c.fillStyle=css("--rim");c.beginPath();c.arc(75,75,74,0,7);c.fill();
+  c.fillStyle=css("--soil");c.beginPath();c.arc(75,75,66,0,7);c.fill();
+  const step=Math.min(7,58/Math.max(rings.length,1));
+  c.fillStyle=css("--herb");c.beginPath();c.arc(75,75,5,0,7);c.fill();
+  rings.forEach((on,i)=>{
+    const rad=7+(i+1)*step,last=now&&i===rings.length-1;
+    c.strokeStyle=on?css("--herb"):css("--herb2");c.lineWidth=on?Math.max(2,step*(last?.9:.6)):1.4;
+    c.beginPath();
+    for(let a=0;a<=6.3;a+=.15){const w=1+(r()-.5)*.05,x=75+Math.cos(a)*rad*w,y=75+Math.sin(a)*rad*w*.97;a===0?c.moveTo(x,y):c.lineTo(x,y)}
+    c.closePath();c.stroke();
+  });
+  return cv;
+}
+
+/* ---------- pieces ---------- */
+const btn=(html,cls,fn,attrs={})=>{const b=document.createElement("button");b.type="button";b.className=cls;b.innerHTML=html;b.onclick=fn;for(const k in attrs)b.setAttribute(k,attrs[k]);return b};
+function facts(it){
+  let state="";
+  if(it.kind==="dish"){const m=dishMins(it);
+    state=it.done===TODAY?`<span class="state due">Washed · saved ~<span class="num">${it.savedMins||0}</span> min</span>`
+      :m.age===0?`<span class="meta"><span class="num">${m.now}</span> min now · <span class="num">${m.wk}</span> in a week</span>`
+      :`<span class="state left">${m.age} day${m.age>1?"s":""} in the sink · <span class="num">${m.now}</span> min now</span>`;
+  }else{const s=herbState(it),n=(it.tended||[]).length;
+    state=`<span class="meta"><span class="num">${n}</span> ring${n===1?"":"s"} · ${RHYTHM[s.r]}</span>`+
+      ((it.tended||[]).includes(TODAY)?`<span class="state due">Watered today</span>`:s.due?`<span class="state due">Due</span>`:`<span class="state rest">Resting</span>`);
+  }
+  return `<div class="facts">${state}</div><div class="facts"><span class="who"><i data-lucide="${WHO[it.who]||"user"}"></i>For ${esc(it.who.toLowerCase()==="me"?"me":it.who.toLowerCase())}</span>${it.example?'<span class="ex">example</span>':""}</div>`;
+}
+function rowShell(it,size,extra){
+  const el=document.createElement("article");el.className="row"+(extra?" "+extra:"");
+  el.appendChild(it.kind==="dish"?drawDish(it,size):drawHerb(it,size));
+  const b=document.createElement("div");b.className="body";
+  b.innerHTML=`<h3 class="h">${esc(it.name)}</h3>${facts(it)}`;el.appendChild(b);
+  return [el,b];
+}
+
+/* ---------- render ---------- */
+function render(){
+  const tp=today(),on=new Set(tp.ids),full=tp.ids.length>=tp.cap;
+  // TODAY
+  $("capn").textContent=tp.cap;$("minus").disabled=tp.cap<=1||tp.cap<=tp.ids.length;$("plus").disabled=tp.cap>=6;
+  const L=$("todayList");L.innerHTML="";
+  tp.ids.forEach(id=>{
+    const it=items.find(i=>i.id===id);if(!it)return;
+    const [el,b]=rowShell(it,84);const a=document.createElement("div");a.className="actions";
+    if(it.kind==="dish"){
+      if(it.done===TODAY)a.appendChild(btn('<i data-lucide="undo-2"></i>Undo',"btn text",()=>{const {savedMins,...rest}=it;store.put({...rest,done:null})}));
+      else{const m=dishMins(it);a.appendChild(btn('<i data-lucide="sparkles"></i>Wash it',"btn primary",()=>store.put({...it,done:TODAY,savedMins:Math.max(0,m.wk-m.now)})))}
+    }else{
+      const w=(it.tended||[]).includes(TODAY);
+      a.appendChild(btn(w?'<i data-lucide="check"></i>Watered':'<i data-lucide="droplet"></i>Water it',w?"btn done":"btn primary",()=>store.put({...it,tended:w?it.tended.filter(d=>d!==TODAY):[...(it.tended||[]),TODAY]})));
+    }
+    if(!isDone(it))a.appendChild(btn("Put back","btn text",()=>store.putPlan({...tp,ids:tp.ids.filter(x=>x!==id)})));
+    b.appendChild(a);L.appendChild(el);
+  });
+  for(let i=tp.ids.length;i<tp.cap;i++){
+    const s=document.createElement("div");s.className="slot";
+    s.innerHTML=`<div class="o"></div><div class="body"><div class="h" style="color:var(--muted)">Open space</div></div>`;
+    const a=document.createElement("div");a.className="actions";
+    a.appendChild(btn('<i data-lucide="cooking-pot"></i>Choose from kitchen',"btn quiet",()=>go("kitchen")));
+    if(i===tp.ids.length&&candidates(tp).length)a.appendChild(btn('<i data-lucide="sparkles"></i>Choose for me',"btn text",fillForMe));
+    s.querySelector(".body").appendChild(a);L.appendChild(s);
+  }
+  const placed=tp.ids.map(id=>items.find(i=>i.id===id)).filter(Boolean),dn=placed.filter(isDone).length;
+  $("todayNote").textContent=!items.length?"Your kitchen is empty. Add a dish or a herb in the Kitchen tab, or load a few examples there."
+    :!placed.length?"Pick what you'll hold today. The crustiest dishes and the herbs that are due are good places to start."
+    :dn===placed.length&&full?"All done. That's today. The kitchen will still be there tomorrow."
+    :dn===placed.length?"Everything you picked is done. There's still room if you want one more."
+    :`${dn} of ${placed.length} done.`;
+
+  // KITCHEN
+  const sink=items.filter(i=>i.kind==="dish"&&!i.done&&!on.has(i.id)).sort((a,b)=>a.created<b.created?-1:1);
+  const sill=items.filter(i=>i.kind==="seed"&&!on.has(i.id)).sort((a,b)=>herbState(b).due-herbState(a).due);
+  $("sinkN").textContent=sink.length?"· "+sink.length:"";$("sillN").textContent=sill.length?"· "+sill.length:"";
+  const fill=(host,list,emptyTxt)=>{
+    host.innerHTML="";
+    if(!list.length){const p=document.createElement("p");p.className="empty";p.textContent=emptyTxt;host.appendChild(p);return}
+    list.forEach(it=>{
+      const [el]=rowShell(it,64,"kitchenrow");const side=document.createElement("div");side.className="side";
+      side.appendChild(btn('<i data-lucide="sun"></i>',"icon solid",()=>{store.putPlan({...tp,ids:[...tp.ids,it.id]})},full?{"aria-label":"Today is full","disabled":""}:{"aria-label":"Add to today","title":"Add to today"}));
+      side.appendChild(btn('<i data-lucide="trash-2"></i>',"icon",()=>askRemove(it),{"aria-label":"Remove","title":"Remove"}));
+      el.appendChild(side);host.appendChild(el);
+    });
+  };
+  const anyDish=items.some(i=>i.kind==="dish"),anyHerb=items.some(i=>i.kind==="seed");
+  fill($("sink"),sink,anyDish?"The sink is clear.":"A dish is a one-off that hardens if left: the email you keep circling, the invoice to chase, the photos to sort.");
+  fill($("sill"),sill,anyHerb?"Every herb is on today's list.":"A herb is a practice with a rhythm: standing practice, a few lines to each child, one honest note about the studio.");
+  if(!items.length){const b=btn('<i data-lucide="sparkles"></i>Show me with examples',"btn quiet",loadExamples);b.style.justifySelf="start";$("sink").appendChild(b)}
+
+  week();icons();
+}
+function candidates(tp){
+  const on=new Set(tp.ids);
+  const d=items.filter(i=>i.kind==="dish"&&!i.done&&!on.has(i.id)).sort((a,b)=>a.created<b.created?-1:1);
+  const h=items.filter(i=>i.kind==="seed"&&!on.has(i.id)&&herbState(i).due).sort((a,b)=>herbState(b).since-herbState(a).since);
+  const out=[];let x=0,y=0;
+  while(x<d.length||y<h.length){if(x<d.length&&(out.length%2===0||y>=h.length))out.push(d[x++].id);else out.push(h[y++].id)}
+  return out;
+}
+function fillForMe(){const tp=today();store.putPlan({...tp,ids:[...tp.ids,...candidates(tp).slice(0,tp.cap-tp.ids.length)]})}
+
+function week(){
+  const days=[...Array(7)].map((_,i)=>addDays(TODAY,i-6));
+  const doneOn=d=>items.filter(i=>i.kind==="dish"&&i.done===d).length+items.filter(i=>i.kind==="seed"&&(i.tended||[]).includes(d)).length;
+  $("days").innerHTML=days.map(d=>{const n=doneOn(d),wd=new Date(d+"T12:00").toLocaleDateString("en-GB",{weekday:"narrow"});
+    return `<div class="day${d===TODAY?" today":""}"><span class="eyebrow">${wd}</span><span class="dot${n?" on":""}">${n||""}</span></div>`}).join("");
+  const washed=items.filter(i=>i.kind==="dish"&&i.done&&days.includes(i.done));
+  const saved=washed.reduce((s,i)=>s+(i.savedMins||0),0);
+  const waters=[];items.filter(i=>i.kind==="seed").forEach(i=>(i.tended||[]).forEach(d=>{if(days.includes(d))waters.push(i)}));
+  const tally={};[...washed,...waters].forEach(i=>tally[i.who]=(tally[i.who]||0)+1);
+  const top=Object.entries(tally).sort((a,b)=>b[1]-a[1])[0],tot=washed.length+waters.length;
+  $("stats").innerHTML=`
+    <div class="stat"><span class="eyebrow">Dishes washed</span><b>${washed.length}</b><span class="meta">~${saved} min of future effort saved</span></div>
+    <div class="stat"><span class="eyebrow">Herbs watered</span><b>${waters.length}</b><span class="meta">rings grown this week</span></div>
+    <div class="stat"><span class="eyebrow">Mostly helped</span><b class="word">${top?esc(top[0]):"—"}</b><span class="meta">${top?Math.round(top[1]/tot*100)+"% of this week's small things":"Nothing done yet this week"}</span></div>`;
+}
+
+/* ---------- navigation ---------- */
+const VIEWS=["today","kitchen","week"];
+function go(v){if(!VIEWS.includes(v))v="today";if(location.hash!=="#"+v)history.replaceState(null,"","#"+v);show(v)}
+function show(v){VIEWS.forEach(n=>{$("v-"+n).hidden=n!==v;document.querySelector(`[data-view="${n}"]`).toggleAttribute("aria-current",n===v);if(n===v)document.querySelector(`[data-view="${n}"]`).setAttribute("aria-current","page")});window.scrollTo(0,0)}
+document.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>go(b.dataset.view));
+addEventListener("hashchange",()=>show(VIEWS.includes(location.hash.slice(1))?location.hash.slice(1):"today"));
+show(VIEWS.includes(location.hash.slice(1))?location.hash.slice(1):"today");
+
+/* ---------- add sheet ---------- */
+let kind="dish",rhythm=1,who="Family";
+function pick(groupId,attr,val){document.querySelectorAll(`#${groupId} button`).forEach(b=>b.setAttribute("aria-pressed",b.dataset[attr]==String(val)))}
+function setKind(k){
+  kind=k;$("kDish").setAttribute("aria-pressed",k==="dish");$("kSeed").setAttribute("aria-pressed",k==="seed");
+  $("fMinsF").hidden=k!=="dish";$("fRhythmF").hidden=k!=="seed";
+  $("addTitle").textContent=k==="dish"?"Add a dish":"Add a herb";
+  $("addSubmit").textContent=k==="dish"?"Put it in the sink":"Put it on the windowsill";
+  $("fName").placeholder=k==="dish"?"Reply to Alex about the template":"Standing practice";
+  $("kindHint").textContent=k==="dish"?"A one-off. It gets about 30% harder each day it sits in the sink.":"A practice. It grows a ring each time you water it. A pale ring appears only when a whole rhythm passes.";
+}
+function openAdd(k){setKind(k);$("addScrim").hidden=false;setTimeout(()=>$("fName").focus(),50)}
+function closeAdd(){$("addScrim").hidden=true}
+document.querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>openAdd(b.dataset.add));
+$("kDish").onclick=()=>setKind("dish");$("kSeed").onclick=()=>setKind("seed");
+document.querySelectorAll("#fRhythm button").forEach(b=>b.onclick=()=>{rhythm=+b.dataset.r;pick("fRhythm","r",rhythm)});
+document.querySelectorAll("#fWho button").forEach(b=>b.onclick=()=>{who=b.dataset.w;pick("fWho","w",who)});
+$("addClose").onclick=closeAdd;$("addScrim").onclick=e=>{if(e.target===$("addScrim"))closeAdd()};
+$("addForm").addEventListener("submit",e=>{
+  e.preventDefault();const name=$("fName").value.trim();if(!name)return;
+  const it={id:uid(),kind,name,who,created:TODAY,done:null,tended:[]};
+  if(kind==="dish")it.mins=Math.max(1,Math.min(240,parseInt($("fMins").value,10)||10));else it.rhythm=rhythm;
+  store.put(it);$("fName").value="";closeAdd();
+});
+
+/* ---------- confirm remove ---------- */
+let pending=null;
+function askRemove(it){
+  pending=it;
+  $("cfTitle").textContent=`Remove “${it.name}”?`;
+  $("cfText").textContent=it.kind==="seed"&&(it.tended||[]).length?`Its ${(it.tended||[]).length} ring${it.tended.length===1?"":"s"} go with it. This can't be undone.`:"It leaves the kitchen for good. This can't be undone.";
+  $("cfScrim").hidden=false;$("cfNo").focus();
+}
+const closeCf=()=>{$("cfScrim").hidden=true;pending=null};
+$("cfNo").onclick=closeCf;$("cfScrim").onclick=e=>{if(e.target===$("cfScrim"))closeCf()};
+$("cfYes").onclick=()=>{if(pending)store.del(pending.id);closeCf()};
+addEventListener("keydown",e=>{if(e.key==="Escape"){closeAdd();closeCf()}});
+
+/* ---------- backup ---------- */
+$("copyBk").onclick=()=>{
+  const txt=JSON.stringify({app:"small-beginnings",v:3,items},null,0);
+  const fb=()=>{$("bkFallback").hidden=false;$("bkFallback").value=txt;$("bkFallback").select()};
+  try{navigator.clipboard.writeText(txt).then(()=>{$("copyBk").innerHTML='<i data-lucide="check"></i>Copied';icons()},fb)}catch(e){fb()}
+};
+$("showRestore").onclick=()=>{$("restoreBox").hidden=!$("restoreBox").hidden};
+$("doRestore").onclick=async()=>{
+  try{
+    const d=JSON.parse($("restoreTxt").value);const list=Array.isArray(d)?d:d.items;if(!Array.isArray(list))throw 0;
+    let n=0;for(const it of list){if(!it||!it.name||!["dish","seed"].includes(it.kind))continue;
+      await store.put({id:String(it.id||uid()).replace(/[^\w-]/g,"").slice(0,40)||uid(),kind:it.kind,name:String(it.name).slice(0,80),who:WHO[it.who]?it.who:"Me",
+        created:/^\d{4}-\d\d-\d\d$/.test(it.created)?it.created:TODAY,done:it.done||null,savedMins:+it.savedMins||0,
+        mins:+it.mins||10,rhythm:[1,2,3,7].includes(+it.rhythm)?+it.rhythm:1,tended:Array.isArray(it.tended)?it.tended.filter(x=>/^\d{4}-\d\d-\d\d$/.test(x)):[],example:!!it.example});n++}
+    $("restoreMsg").textContent=`Restored ${n} item${n===1?"":"s"}.`;$("restoreTxt").value="";
+  }catch(e){$("restoreMsg").textContent="That doesn't look like a backup. Paste the full text you copied."}
+};
+
+async function loadExamples(){
+  const ex=[
+    {kind:"dish",name:"Answer the email you've been circling",mins:10,who:"Clients",created:addDays(TODAY,-3)},
+    {kind:"dish",name:"Sort this week's photos of the kids",mins:15,who:"Family",created:addDays(TODAY,-1)},
+    {kind:"dish",name:"Write down one idea before it fades",mins:5,who:"Me",created:TODAY},
+    {kind:"seed",name:"Standing practice",rhythm:1,who:"Me",created:addDays(TODAY,-14),tended:[...Array(14)].map((_,i)=>addDays(TODAY,-i-1)).filter((_,i)=>i%5!==3)},
+    {kind:"seed",name:"A few lines to each child",rhythm:3,who:"Family",created:addDays(TODAY,-10),tended:[addDays(TODAY,-10),addDays(TODAY,-7),addDays(TODAY,-4)]},
+  ];
+  for(const e of ex)await store.put({id:uid(),done:null,tended:[],...e,example:true});
+}
+
+matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",render);
+new MutationObserver(render).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+boot();
+})();
+</script>
