@@ -23,8 +23,8 @@ export const S = {
   // actions
   wash: "Wash it", water: "Water it", watered: "Watered", undo: "Undo", putBack: "Put back",
   addToToday: "Add to today", todayFull: "Today is full", remove: "Remove",
-  chooseFromKitchen: "Choose from kitchen", chooseForMe: "Choose for me",
-  openSpace: "Open space", examples: "Show me with examples",
+  addFromKitchen: "Add", chooseForMe: "Choose for me",
+  openSpace: "Open space",
 
   // states
   washedSaved: (n) => `Washed · saved ~<span class="num">${n}</span> min`,
@@ -39,7 +39,7 @@ export const S = {
   forWho: (w) => `For ${w === "Me" ? "me" : w.toLowerCase()}`,
 
   // today notes
-  noteEmptyKitchen: "Your kitchen is empty. Add a dish or a herb in the Kitchen tab, or load a few examples there.",
+  noteEmptyKitchen: "Your kitchen is empty. Add a dish or a herb in the Kitchen tab.",
   noteNothingPicked: "Pick what you'll hold today. The crustiest dishes and the herbs that are due are good places to start.",
   noteAllDoneFull: "All done. That's today. The kitchen will still be there tomorrow.",
   noteAllDoneRoom: "Everything you picked is done. There's still room if you want one more.",
@@ -70,13 +70,25 @@ export const S = {
   statWatered: "Herbs watered", statWateredLine: "rings grown this week",
   statHelped: "Mostly helped", statHelpedLine: (p) => `${p}% of this week's small things`, statHelpedNone: "Nothing done yet this week",
 
+  // settings
+  settings: "Settings", settingsTitle: "Settings",
+  appearance: "Appearance", themeSystem: "System", themeLight: "Light", themeDark: "Dark",
+
   // backup
   backupTitle: "Backup",
-  backupLine: "Copy everything as text to keep somewhere safe, or paste a backup to restore it. This is also how you move your kitchen to another device.",
-  copyBackup: "Copy backup", copied: "Copied", restore: "Restore", pasteBackup: "Paste a backup",
+  backupLine: "Your kitchen lives only on this device. Save a backup file somewhere safe, like Google Drive, or use one to move your kitchen to another device.",
+  saveFile: "Save backup file", shareFile: "Send to…", copyBackup: "Copy as text", copied: "Copied",
+  restoreTitle: "Restore", restoreLine: "Bring items back from a backup. Matching items are updated, nothing is deleted.",
+  restoreFile: "From a file", restorePaste: "Paste text", pasteBackup: "Paste a backup",
   restoreDo: "Restore these items", backupText: "Backup text",
-  restored: (n) => `Restored ${n} item${n === 1 ? "" : "s"}.`,
-  restoreBad: "That doesn't look like a backup. Paste the full text you copied.",
+  lastBackup: (days) => days == null ? "No backup yet on this device."
+    : days === 0 ? "Last backup: today." : days === 1 ? "Last backup: yesterday." : `Last backup: ${days} days ago.`,
+  restoredTitle: "Backup restored",
+  restored: (n) => `${n} item${n === 1 ? " is" : "s are"} back in your kitchen. Nothing else was removed.`,
+  restoreBadTitle: "Couldn't restore",
+  restoreBad: "That doesn't look like a Small Beginnings backup. Nothing was changed.",
+  done: "Done",
+  version: (v, d) => `Version ${v} · ${d}`,
 
   // storage status
   savedDevice: "Saved on this device.",

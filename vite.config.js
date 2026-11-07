@@ -1,12 +1,17 @@
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
+import pkg from "./package.json" with { type: "json" };
+
+const built = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 
 export default defineConfig({
+  // shown at the bottom of Settings, so you can tell which version the phone is running
+  define: { __APP_VERSION__: JSON.stringify(pkg.version), __BUILD_DATE__: JSON.stringify(built) },
   plugins: [
     VitePWA({
       // New releases install in the background and take over on the next open.
       registerType: "autoUpdate",
-      injectRegister: "auto",
+      injectRegister: false, // registered in main.js (registerSW) so updates wait for a calm moment
       includeAssets: ["icons/favicon-64.png", "icons/apple-touch-icon.png"],
       manifest: {
         name: "Small Beginnings",

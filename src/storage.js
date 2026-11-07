@@ -2,14 +2,14 @@
  *
  * Small on purpose: the app keeps everything in memory and writes through.
  * If the app later moves to Capacitor/native, only this file changes.
- * Keys: "items" (array of items), "plan" (today's plan).
+ * Keys: "items" (array of items), "plan" (today's plan), "meta" ({ lastBackup }).
  */
 import { createStore, get, set } from "idb-keyval";
 
 let db = null;
 try { db = createStore("small-beginnings", "kv"); } catch { db = null; }
 
-let mem = { items: [], plan: null };
+let mem = { items: [], plan: null, meta: {} };
 let ok = !!db;
 
 export const store = {
@@ -17,8 +17,8 @@ export const store = {
   async loadAll() {
     if (db) {
       try {
-        const [items, plan] = await Promise.all([get("items", db), get("plan", db)]);
-        mem = { items: Array.isArray(items) ? items : [], plan: plan || null };
+        const [items, plan, meta] = await Promise.all([get("items", db), get("plan", db), get("meta", db)]);
+        mem = { items: Array.isArray(items) ? items : [], plan: plan || null, meta: meta || {} };
       } catch { ok = false; }
     }
     return { ...mem, ok };
@@ -35,6 +35,11 @@ export const store = {
   async putPlan(plan) {
     mem.plan = plan;
     if (ok) try { await set("plan", plan, db); } catch { ok = false; }
+  },
+  getMeta: () => mem.meta,
+  async putMeta(patch) {
+    mem.meta = { ...mem.meta, ...patch };
+    if (ok) try { await set("meta", mem.meta, db); } catch { ok = false; }
   },
   isOk: () => ok,
 };

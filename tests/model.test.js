@@ -96,6 +96,11 @@ describe("choose for me", () => {
 });
 
 describe("today plan", () => {
+  it("room for today steps up and down", () => {
+    const p = { day: T, ids: [], cap: 3 };
+    expect(M.stepCap(p, 1).cap).toBe(4);
+    expect(M.stepCap(p, -1).cap).toBe(2);
+  });
   const items = [dish({ id: "a" }), dish({ id: "b" })];
   it("a plan from yesterday is empty but keeps cap", () => {
     expect(M.planFor({ day: ago(1), ids: ["a"], cap: 5 }, items, T)).toEqual({ day: T, ids: [], cap: 5 });
@@ -152,7 +157,7 @@ describe("restore", () => {
     expect(() => M.parseBackup('{"foo":1}', T)).toThrow();
   });
   it("round-trips a v4 backup and upserts by id", () => {
-    const items = M.exampleItems(T, mk);
+    const items = [dish({ id: "a" }), dish({ id: "b", done: ago(1), savedMins: 4 }), herb({ id: "c", created: ago(3), tended: [ago(2), ago(1)] })];
     const back = M.parseBackup(M.makeBackup(items), T, mk);
     expect(back).toEqual(items);
     const merged = M.mergeItems(items, [{ ...items[0], name: "Renamed" }]);

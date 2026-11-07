@@ -115,3 +115,14 @@ input,select{font:inherit;font-size:16px;color:var(--ink);background:var(--raise
 html{-webkit-text-size-adjust:100%}
 body{margin:0;min-height:100dvh;overscroll-behavior-y:none}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* settings button: top right on every view */
+main{position:relative;max-width:640px;margin:0 auto}
+.topbtn{position:absolute;top:-8px;right:0;z-index:5;background:var(--surface);border-color:var(--surface)}
+.vhead>.eyebrow:first-child{padding-right:52px}
+/* settings sheet */
+.setsect{display:grid;gap:var(--s3);border-top:1px solid var(--line);padding-top:var(--s5)}
+.setsect .h+.hint{margin-top:var(--s1)}
+.setfoot{display:grid;gap:var(--s2);border-top:1px solid var(--line);padding-top:var(--s4)}
+.setfoot .hint,.setfoot .eyebrow{margin:0}
+:root[data-theme="light"]{color-scheme:light}

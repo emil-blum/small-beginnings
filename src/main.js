@@ -12,13 +12,16 @@ import "@fontsource/ibm-plex-mono/latin-500.css";
 import "./styles.css";
 
 import { createIcons, Sun, CookingPot, CalendarRange, Plus, Minus, X, Trash, Sparkles, Droplet,
-  Check, Undo2, Heart, Users, Briefcase, User, Copy, Upload } from "lucide";
+  Check, Undo2, Heart, Users, Briefcase, User, Copy, Upload, Download, Share2, ClipboardPaste, Settings,
+  Monitor, Moon } from "lucide";
+import { registerSW } from "virtual:pwa-register";
 import * as M from "./model.js";
 import { S } from "./strings.js";
 import { store, askPersist } from "./storage.js";
 import { drawPlate, readTokens } from "./draw.js";
 
-const ICONS = { Sun, CookingPot, CalendarRange, Plus, Minus, X, Trash, Sparkles, Droplet, Check, Undo2, Heart, Users, Briefcase, User, Copy, Upload };
+const ICONS = { Sun, CookingPot, CalendarRange, Plus, Minus, X, Trash, Sparkles, Droplet, Check, Undo2, Heart, Users,
+  Briefcase, User, Copy, Upload, Download, Share2, ClipboardPaste, Settings, Monitor, Moon };
 const WHO_ICON = { Family: "heart", Others: "users", Clients: "briefcase", Me: "user" };
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
@@ -128,7 +131,7 @@ function render() {
     s.innerHTML = `<div class="o"></div><div class="body"><div class="h" style="color:var(--muted)">${S.openSpace}</div></div>`;
     const a = document.createElement("div");
     a.className = "actions";
-    a.appendChild(btn(`<i data-lucide="cooking-pot"></i>${S.chooseFromKitchen}`, "btn quiet", () => go("kitchen")));
+    a.appendChild(btn(`<i data-lucide="plus"></i>${S.addFromKitchen}`, "btn quiet", () => go("kitchen")));
     if (i === tp.ids.length && anyCandidates) a.appendChild(btn(`<i data-lucide="sparkles"></i>${S.chooseForMe}`, "btn text", () => putPlan(M.fillForMe(plan(), items, TODAY))));
     s.querySelector(".body").appendChild(a);
     L.appendChild(s);
@@ -167,13 +170,9 @@ function render() {
   const anyDish = items.some((i) => i.kind === "dish"), anyHerb = items.some((i) => i.kind === "seed");
   fill($("sink"), sink, anyDish ? S.sinkClear : S.sinkIntro);
   fill($("sill"), sill, anyHerb ? S.sillAllOnToday : S.sillIntro);
-  if (!items.length) {
-    const b = btn(`<i data-lucide="sparkles"></i>${S.examples}`, "btn quiet", loadExamples);
-    b.style.justifySelf = "start";
-    $("sink").appendChild(b);
-  }
 
   week();
+  settingsInfo();
   icons();
 }
 
@@ -209,6 +208,38 @@ document.querySelectorAll("[data-view]").forEach((b) => (b.onclick = () => go(b.
 addEventListener("hashchange", () => show(fromHash()));
 show(fromHash());
 
+/* ---------- sheets (add, remove, settings, notice) ---------- */
+// One stack so Esc closes the topmost sheet and focus returns where it came from.
+const openStack = [];
+function openSheet(id) {
+  if (!$(id).hidden) return;
+  openStack.push({ id, from: document.activeElement });
+  $(id).hidden = false;
+}
+function closeSheet(id) {
+  if ($(id).hidden) return;
+  $(id).hidden = true;
+  const i = openStack.findIndex((x) => x.id === id);
+  const [entry] = i < 0 ? [] : openStack.splice(i, 1);
+  if (id === "cfScrim") pending = null;
+  entry?.from?.focus?.();
+  maybeReload();
+}
+document.querySelectorAll("[data-close]").forEach((b) => b.addEventListener("click", () => closeSheet(b.dataset.close)));
+document.querySelectorAll(".scrim").forEach((sc) => sc.addEventListener("click", (e) => { if (e.target === sc) closeSheet(sc.id); }));
+addEventListener("keydown", (e) => { if (e.key === "Escape" && openStack.length) closeSheet(openStack.at(-1).id); });
+
+function notice(title, text) {
+  $("ntTitle").textContent = title;
+  $("ntText").textContent = text;
+  openSheet("ntScrim");
+  $("ntDone").focus();
+}
+
+/* ---------- room for today ---------- */
+$("minus").onclick = () => putPlan(M.stepCap(plan(), -1));
+$("plus").onclick = () => putPlan(M.stepCap(plan(), 1));
+
 /* ---------- add sheet ---------- */
 let kind = "dish", rhythm = 1, who = "Family";
 const pick = (groupId, attr, val) =>
@@ -224,16 +255,12 @@ function setKind(k) {
   $("fName").placeholder = k === "dish" ? S.placeholderDish : S.placeholderHerb;
   $("kindHint").textContent = k === "dish" ? S.hintDish : S.hintHerb;
 }
-let lastFocus = null;
-function openAdd(k) { lastFocus = document.activeElement; setKind(k); $("addScrim").hidden = false; setTimeout(() => $("fName").focus(), 50); }
-function closeAdd() { if ($("addScrim").hidden) return; $("addScrim").hidden = true; lastFocus?.focus?.(); }
+function openAdd(k) { setKind(k); openSheet("addScrim"); setTimeout(() => $("fName").focus(), 50); }
 document.querySelectorAll("[data-add]").forEach((b) => (b.onclick = () => openAdd(b.dataset.add)));
 $("kDish").onclick = () => setKind("dish");
 $("kSeed").onclick = () => setKind("seed");
 document.querySelectorAll("#fRhythm button").forEach((b) => (b.onclick = () => { rhythm = +b.dataset.r; pick("fRhythm", "r", rhythm); }));
 document.querySelectorAll("#fWho button").forEach((b) => (b.onclick = () => { who = b.dataset.w; pick("fWho", "w", who); }));
-$("addClose").onclick = closeAdd;
-$("addScrim").onclick = (e) => { if (e.target === $("addScrim")) closeAdd(); };
 $("addForm").addEventListener("submit", (e) => {
   e.preventDefault();
   checkDay();
@@ -242,32 +269,93 @@ $("addForm").addEventListener("submit", (e) => {
   if (!it) return;
   putItem(it);
   $("fName").value = "";
-  closeAdd();
+  closeSheet("addScrim");
 });
 
 /* ---------- confirm remove ---------- */
 let pending = null;
 function askRemove(it) {
-  lastFocus = document.activeElement;
-  pending = it;
   const n = (it.tended || []).length;
   $("cfTitle").textContent = S.removeTitle(it.name);
   $("cfText").textContent = it.kind === "seed" && n ? S.removeRings(n) : S.removePlain;
-  $("cfScrim").hidden = false;
+  openSheet("cfScrim");
+  pending = it;
   $("cfNo").focus();
 }
-function closeCf() { if ($("cfScrim").hidden) return; $("cfScrim").hidden = true; pending = null; lastFocus?.focus?.(); }
-$("cfNo").onclick = closeCf;
-$("cfScrim").onclick = (e) => { if (e.target === $("cfScrim")) closeCf(); };
-$("cfYes").onclick = () => { if (pending) delItem(pending.id); closeCf(); };
-addEventListener("keydown", (e) => { if (e.key === "Escape") { closeAdd(); closeCf(); } });
+$("cfYes").onclick = () => { const it = pending; closeSheet("cfScrim"); if (it) delItem(it.id); };
 
-/* ---------- backup ---------- */
+/* ---------- settings: appearance ---------- */
+const THEME_KEY = "sb-theme";
+const THEME_COLOR = { light: "#E6ECE5", dark: "#111714" };
+const getTheme = () => { try { return localStorage.getItem(THEME_KEY) || "system"; } catch { return "system"; } };
+function applyTheme(t) {
+  const root = document.documentElement;
+  if (t === "light" || t === "dark") root.dataset.theme = t; else delete root.dataset.theme;
+  // the phone's status bar colour follows the chosen theme too
+  document.querySelectorAll('meta[name="theme-color"]').forEach((m) => {
+    const media = m.getAttribute("media") || "";
+    m.content = t === "system" ? THEME_COLOR[media.includes("dark") ? "dark" : "light"] : THEME_COLOR[t];
+  });
+  pick("fTheme", "t", t);
+}
+document.querySelectorAll("#fTheme button").forEach((b) => (b.onclick = () => {
+  const t = b.dataset.t;
+  try { t === "system" ? localStorage.removeItem(THEME_KEY) : localStorage.setItem(THEME_KEY, t); } catch {}
+  applyTheme(t);
+}));
+applyTheme(getTheme());
+$("openSettings").onclick = () => { settingsInfo(); openSheet("setScrim"); };
+
+/* ---------- settings: backup ---------- */
+const backupName = () => `small-beginnings-backup-${TODAY}.json`;
+async function markBackedUp() { await store.putMeta({ lastBackup: TODAY }); settingsInfo(); }
+function settingsInfo() {
+  const lb = store.getMeta().lastBackup;
+  $("lastBk").textContent = S.lastBackup(M.isDateKey(lb) ? Math.max(0, M.daysBetween(lb, TODAY)) : null);
+  $("version").textContent = S.version(__APP_VERSION__, __BUILD_DATE__);
+}
+
+$("saveBk").onclick = () => {
+  const url = URL.createObjectURL(new Blob([M.makeBackup(items)], { type: "application/json" }));
+  const a = document.createElement("a");
+  a.href = url; a.download = backupName();
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10_000);
+  markBackedUp();
+};
+
+// "Send to…" opens the phone's share sheet (Drive, email, messages). Only shown where it works.
+const backupFile = () => new File([M.makeBackup(items)], backupName(), { type: "application/json" });
+try { $("shareBk").hidden = !navigator.canShare?.({ files: [backupFile()] }); } catch { $("shareBk").hidden = true; }
+$("shareBk").onclick = async () => {
+  try { await navigator.share({ files: [backupFile()], title: "Small Beginnings backup" }); markBackedUp(); }
+  catch { /* cancelled */ }
+};
+
 $("copyBk").onclick = () => {
   const txt = M.makeBackup(items);
-  const fallback = () => { const f = $("bkFallback"); f.hidden = false; f.value = txt; f.select(); };
-  const done = () => { $("copyBk").innerHTML = `<i data-lucide="check"></i>${S.copied}`; icons(); };
+  const fallback = () => { const f = $("bkFallback"); f.hidden = false; f.value = txt; f.select(); markBackedUp(); };
+  const done = () => { $("copyBk").innerHTML = `<i data-lucide="check"></i>${S.copied}`; icons(); markBackedUp(); };
   try { navigator.clipboard.writeText(txt).then(done, fallback); } catch { fallback(); }
+};
+
+/* ---------- settings: restore ---------- */
+async function restoreFrom(text) {
+  let incoming;
+  try { incoming = M.parseBackup(text, TODAY); } catch { return notice(S.restoreBadTitle, S.restoreBad); }
+  items = M.mergeItems(items, incoming);
+  render();
+  await store.putItems(items);
+  $("restoreTxt").value = "";
+  $("restoreBox").hidden = true;
+  $("showRestore").setAttribute("aria-expanded", "false");
+  notice(S.restoredTitle, S.restored(incoming.length));
+}
+$("restoreFileBtn").onclick = () => $("restoreFile").click();
+$("restoreFile").onchange = async (e) => {
+  const f = e.target.files?.[0];
+  e.target.value = "";
+  if (f) restoreFrom(await f.text());
 };
 $("showRestore").onclick = () => {
   const box = $("restoreBox");
@@ -275,28 +363,27 @@ $("showRestore").onclick = () => {
   $("showRestore").setAttribute("aria-expanded", String(!box.hidden));
   if (!box.hidden) $("restoreTxt").focus();
 };
-$("doRestore").onclick = async () => {
-  try {
-    const incoming = M.parseBackup($("restoreTxt").value, TODAY);
-    items = M.mergeItems(items, incoming);
-    render();
-    await store.putItems(items);
-    $("restoreMsg").textContent = S.restored(incoming.length);
-    $("restoreTxt").value = "";
-  } catch {
-    $("restoreMsg").textContent = S.restoreBad;
-  }
-};
+$("doRestore").onclick = () => restoreFrom($("restoreTxt").value);
 
-async function loadExamples() {
-  items = [...items, ...M.exampleItems(TODAY)];
-  render();
-  await store.putItems(items);
-}
-
-/* ---------- theme ---------- */
+/* ---------- theme changes redraw the plates ---------- */
 matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", render);
 new MutationObserver(render).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+/* ---------- updates ---------- */
+// A new version downloads in the background. It's applied by reloading, but never while
+// a sheet is open (you might be typing): it waits until sheets close or the app is hidden.
+let reloadPending = false;
+function maybeReload() { if (reloadPending && !openStack.length) location.reload(); }
+registerSW({
+  immediate: true,
+  onNeedReload() { reloadPending = true; maybeReload(); },
+  onRegisteredSW(_url, reg) {
+    if (!reg) return;
+    // Installed apps can stay open for days: look for a new version whenever it comes back to the front.
+    document.addEventListener("visibilitychange", () => { if (!document.hidden) reg.update().catch(() => {}); });
+  },
+});
+document.addEventListener("visibilitychange", () => { if (document.hidden && reloadPending) location.reload(); });
 
 /* ---------- boot ---------- */
 (async function boot() {

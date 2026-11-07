@@ -9,9 +9,12 @@
 <meta name="theme-color" content="#111714" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="/icons/favicon-64.png" type="image/png">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<script>/* apply a chosen theme before first paint, so there's no flash */
+try{var t=localStorage.getItem("sb-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}</script>
 </head>
 <body>
 <main>
+  <button class="icon topbtn" type="button" id="openSettings" data-s-label="settings"><i data-lucide="settings"></i></button>
   <!-- TODAY -->
   <section class="view" id="v-today" aria-labelledby="t-today">
     <div class="vhead">
@@ -58,20 +61,6 @@
     </div>
     <div class="days" id="days"></div>
     <div class="stats" id="stats"></div>
-    <div class="backup">
-      <div><div class="h" data-s="backupTitle"></div><p class="hint" data-s="backupLine"></p></div>
-      <div class="actions">
-        <button class="btn quiet" type="button" id="copyBk"><i data-lucide="copy"></i><span data-s="copyBackup"></span></button>
-        <button class="btn quiet" type="button" id="showRestore" aria-expanded="false" aria-controls="restoreBox"><i data-lucide="upload"></i><span data-s="restore"></span></button>
-      </div>
-      <div id="restoreBox" class="field" hidden>
-        <label class="eyebrow" for="restoreTxt" data-s="pasteBackup"></label>
-        <textarea id="restoreTxt" spellcheck="false"></textarea>
-        <div class="actions"><button class="btn primary" type="button" id="doRestore" data-s="restoreDo"></button><span class="meta" id="restoreMsg" aria-live="polite"></span></div>
-      </div>
-      <textarea id="bkFallback" readonly hidden data-s-label="backupText"></textarea>
-    </div>
-    <div class="meta" id="status"></div>
   </section>
 </main>
 
@@ -85,7 +74,7 @@
 <div class="scrim" id="addScrim" hidden>
   <form class="sheet" id="addForm" role="dialog" aria-modal="true" aria-labelledby="addTitle">
     <div class="sheethead"><h2 class="title" style="font-size:26px" id="addTitle"></h2>
-      <button class="icon" type="button" id="addClose" data-s-label="close"><i data-lucide="x"></i></button></div>
+      <button class="icon" type="button" data-close="addScrim" data-s-label="close"><i data-lucide="x"></i></button></div>
     <div class="seg" role="group" data-s-label="kind">
       <button type="button" id="kDish" aria-pressed="true" data-s="Dish"></button>
       <button type="button" id="kSeed" aria-pressed="false" data-s="Herb"></button>
@@ -107,9 +96,64 @@
     <div class="sheethead"><h2 class="title" style="font-size:24px" id="cfTitle"></h2></div>
     <p class="hint" id="cfText"></p>
     <div class="actions" style="justify-content:flex-end">
-      <button class="btn quiet" type="button" id="cfNo" data-s="keep"></button>
+      <button class="btn quiet" type="button" id="cfNo" data-close="cfScrim" data-s="keep"></button>
       <button class="btn danger" type="button" id="cfYes"><i data-lucide="trash"></i><span data-s="removeForGood"></span></button>
     </div>
+  </div>
+</div>
+
+<!-- settings sheet -->
+<div class="scrim" id="setScrim" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="setTitle">
+    <div class="sheethead"><h2 class="title" style="font-size:26px" id="setTitle" data-s="settingsTitle"></h2>
+      <button class="icon" type="button" data-close="setScrim" data-s-label="close"><i data-lucide="x"></i></button></div>
+
+    <div class="field"><span class="eyebrow" id="themeL" data-s="appearance"></span>
+      <div class="seg" role="group" aria-labelledby="themeL" id="fTheme">
+        <button type="button" data-t="system"><i data-lucide="monitor"></i><span data-s="themeSystem"></span></button>
+        <button type="button" data-t="light"><i data-lucide="sun"></i><span data-s="themeLight"></span></button>
+        <button type="button" data-t="dark"><i data-lucide="moon"></i><span data-s="themeDark"></span></button>
+      </div></div>
+
+    <div class="setsect">
+      <div><div class="h" data-s="backupTitle"></div><p class="hint" data-s="backupLine"></p></div>
+      <p class="hint" id="lastBk"></p>
+      <div class="actions">
+        <button class="btn primary" type="button" id="saveBk"><i data-lucide="download"></i><span data-s="saveFile"></span></button>
+        <button class="btn quiet" type="button" id="shareBk" hidden><i data-lucide="share-2"></i><span data-s="shareFile"></span></button>
+        <button class="btn quiet" type="button" id="copyBk"><i data-lucide="copy"></i><span data-s="copyBackup"></span></button>
+      </div>
+      <textarea id="bkFallback" readonly hidden data-s-label="backupText"></textarea>
+    </div>
+
+    <div class="setsect">
+      <div><div class="h" data-s="restoreTitle"></div><p class="hint" data-s="restoreLine"></p></div>
+      <div class="actions">
+        <button class="btn quiet" type="button" id="restoreFileBtn"><i data-lucide="upload"></i><span data-s="restoreFile"></span></button>
+        <button class="btn quiet" type="button" id="showRestore" aria-expanded="false" aria-controls="restoreBox"><i data-lucide="clipboard-paste"></i><span data-s="restorePaste"></span></button>
+        <input type="file" id="restoreFile" accept=".json,application/json,text/plain" hidden>
+      </div>
+      <div id="restoreBox" class="field" hidden>
+        <label class="eyebrow" for="restoreTxt" data-s="pasteBackup"></label>
+        <textarea id="restoreTxt" spellcheck="false"></textarea>
+        <div class="actions"><button class="btn primary" type="button" id="doRestore" data-s="restoreDo"></button></div>
+      </div>
+    </div>
+
+    <div class="setfoot">
+      <p class="hint" id="status"></p>
+      <p class="eyebrow" id="version"></p>
+    </div>
+  </div>
+</div>
+
+<!-- notice: a message that needs a Done -->
+<div class="scrim" id="ntScrim" hidden>
+  <div class="sheet" role="alertdialog" aria-modal="true" aria-labelledby="ntTitle" aria-describedby="ntText">
+    <div class="sheethead"><h2 class="title" style="font-size:24px" id="ntTitle"></h2>
+      <button class="icon" type="button" data-close="ntScrim" data-s-label="close"><i data-lucide="x"></i></button></div>
+    <p class="hint" id="ntText"></p>
+    <button class="btn primary" type="button" id="ntDone" data-close="ntScrim" data-s="done"></button>
   </div>
 </div>
 

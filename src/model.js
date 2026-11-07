@@ -221,17 +221,3 @@ export function mergeItems(items, incoming) {
   incoming.forEach((i) => map.set(i.id, i));
   return [...map.values()];
 }
-
-/* ---------- examples ---------- */
-export function exampleItems(today, makeId = uid) {
-  const ex = [
-    { kind: "dish", name: "Answer the email you've been circling", mins: 10, who: "Clients", created: addDays(today, -3) },
-    { kind: "dish", name: "Sort this week's photos of the kids", mins: 15, who: "Family", created: addDays(today, -1) },
-    { kind: "dish", name: "Write down one idea before it fades", mins: 5, who: "Me", created: today },
-    { kind: "seed", name: "Standing practice", rhythm: 1, who: "Me", created: addDays(today, -14),
-      tended: [...Array(14)].map((_, i) => addDays(today, -i - 1)).filter((_, i) => i % 5 !== 3) },
-    { kind: "seed", name: "A few lines to each child", rhythm: 3, who: "Family", created: addDays(today, -10),
-      tended: [addDays(today, -10), addDays(today, -7), addDays(today, -4)] },
-  ];
-  return ex.map((e) => sanitizeItem({ ...e, id: makeId(), example: true }, today, makeId));
-}
