@@ -146,3 +146,21 @@ body.locked{overflow:hidden}
 .whotable .n.zero{color:var(--faint)}
 .whotable .lbl{display:inline-flex;align-items:center;gap:var(--s2);font-size:15px}
 .whotable .lbl svg.lucide{color:var(--muted)}
+
+/* v4.3: effort estimate line + "?" explainer */
+/* icon | sentence (wraps as one block) | ? */
+.grow{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:6px;font-size:13px;line-height:1.4;color:var(--muted)}
+.grow>span:empty{display:none}
+.grow:has(>span:empty),.grow.nolead{grid-template-columns:1fr auto}
+.grow svg.lucide{width:15px;height:15px}
+.why{display:inline-grid;place-items:center;width:32px;height:32px;margin:-8px -8px -8px -4px;border:0;border-radius:50%;background:transparent;color:var(--faint)}
+.why svg.lucide{width:16px;height:16px}
+.why:hover{color:var(--accent)}
+.prose{display:grid;gap:var(--s3)}
+.prose blockquote{margin:0;padding-left:var(--s4);border-left:2px solid var(--herb);font:600 20px/1.4 var(--f-display);white-space:pre-line}
+.prose .eyebrow{margin:calc(-1 * var(--s1)) 0 var(--s2)}
+.prose .h{margin-top:var(--s3)}
+.prose p{margin:0}
+.prose ul{margin:0;padding-left:18px;display:grid;gap:var(--s2);font-size:14px;color:var(--muted)}
+.prose li b{color:var(--ink);font-weight:600}
+.nw{white-space:nowrap}

@@ -13,7 +13,7 @@ import "./styles.css";
 
 import { createIcons, Sun, CookingPot, CalendarRange, Plus, Minus, X, Trash, Sparkles, Droplet,
   Check, Undo2, Heart, Users, Briefcase, User, Copy, Upload, Download, Share2, ClipboardPaste, Settings,
-  Monitor, Moon, Target, CirclePlus } from "lucide";
+  Monitor, Moon, Target, CirclePlus, TrendingUp, CircleQuestionMark } from "lucide";
 import { registerSW } from "virtual:pwa-register";
 import * as M from "./model.js";
 import { S } from "./strings.js";
@@ -21,7 +21,7 @@ import { store, askPersist } from "./storage.js";
 import { drawPlate, readTokens } from "./draw.js";
 
 const ICONS = { Sun, CookingPot, CalendarRange, Plus, Minus, X, Trash, Sparkles, Droplet, Check, Undo2, Heart, Users,
-  Briefcase, User, Copy, Upload, Download, Share2, ClipboardPaste, Settings, Monitor, Moon, Target, CirclePlus };
+  Briefcase, User, Copy, Upload, Download, Share2, ClipboardPaste, Settings, Monitor, Moon, Target, CirclePlus, TrendingUp, CircleQuestionMark };
 const WHO_ORDER = ["Me", "Family", "Others", "Clients"]; // display order in Week
 const WHO_ICON = { Family: "heart", Others: "users", Clients: "briefcase", Me: "user" };
 const $ = (id) => document.getElementById(id);
@@ -68,13 +68,18 @@ function btn(html, cls, fn, attrs = {}) {
   return b;
 }
 
+const whyBtn = () => `<button type="button" class="why" data-why aria-label="${S.whyLabel}" title="${S.whyLabel}"><i data-lucide="circle-question-mark"></i></button>`;
+
 function facts(it) {
   let state = "";
   if (it.kind === "dish") {
     const m = M.dishMins(it, TODAY);
-    state = it.done === TODAY ? `<span class="state due">${S.washedSaved(it.savedMins || 0)}</span>`
-      : m.age === 0 ? `<span class="meta">${S.minsNow(m.now, m.wk)}</span>`
-      : `<span class="state left">${S.inSink(m.age, m.now)}</span>`;
+    if (it.done === TODAY) state = `<span class="state due">${S.washedSaved(it.savedMins || 0)}</span>`;
+    else {
+      // line 1: where it is now. line 2: what waiting would cost, with the "?" explainer.
+      state = (m.age === 0 ? `<span class="meta">${S.minsNow(m.now)}</span>` : `<span class="state left">${S.inSink(m.age, m.now)}</span>`)
+        + `</div><div class="facts"><span class="grow">${m.capped ? `<span></span><span>${S.atCap}</span>` : `<i data-lucide="trending-up"></i><span>${S.willGrow(m.later, m.horizon)}</span>`}${whyBtn()}</span>`;
+    }
   } else {
     const s = M.herbState(it, TODAY), n = (it.tended || []).length;
     state = `<span class="meta">${S.rings(n)} · ${S.rhythm[s.r]}</span>` +
@@ -184,7 +189,7 @@ function week() {
     return `<div class="day${day === TODAY ? " today" : ""}"><span class="eyebrow">${wd}</span><span class="dot${n ? " on" : ""}">${n || ""}</span></div>`;
   }).join("");
   $("stats").innerHTML = `
-    <div class="stat"><span class="eyebrow">${S.statWashed}</span><b>${w.washed}</b><span class="meta">${S.statSaved(w.saved)}</span></div>
+    <div class="stat"><span class="eyebrow">${S.statWashed}</span><b>${w.washed}</b><span class="meta grow nolead"><span>${S.statSaved(w.saved)}</span>${whyBtn()}</span></div>
     <div class="stat"><span class="eyebrow">${S.statWatered}</span><b>${w.watered}</b><span class="meta">${S.statWateredLine}</span></div>`;
   const cell = (n) => `<span class="n${n ? "" : " zero"}">${n}</span>`;
   $("whoCard").innerHTML = `<div class="stat"><span class="eyebrow">${S.statHelped}</span><b class="word">${w.top ? esc(S.who[w.top.who]) : "—"}</b><span class="meta">${w.top ? S.statHelpedLine(w.top.share) : S.statHelpedNone}</span></div>
@@ -241,6 +246,15 @@ function notice(title, text) {
   openSheet("ntScrim");
   $("ntClose").focus();
 }
+
+/* ---------- the "?" explainer ---------- */
+$("whyBody").innerHTML = S.whyHTML;
+document.addEventListener("click", (e) => {
+  if (!e.target.closest("[data-why]")) return;
+  openSheet("whyScrim");
+  $("whyScrim").querySelector(".sheet").scrollTop = 0;
+  $("whyClose").focus();
+});
 
 /* ---------- room for today ---------- */
 $("minus").onclick = () => putPlan(M.stepCap(plan(), -1));

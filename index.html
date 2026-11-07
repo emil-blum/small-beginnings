@@ -150,6 +150,15 @@ try{var t=localStorage.getItem("sb-theme");if(t==="light"||t==="dark")document.d
   </div>
 </div>
 
+<!-- why: the explainer behind every effort estimate -->
+<div class="scrim" id="whyScrim" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="whyTitle">
+    <div class="sheethead"><h2 class="title" style="font-size:26px" id="whyTitle" data-s="whyTitle"></h2>
+      <button class="icon" type="button" id="whyClose" data-close="whyScrim" data-s-label="close"><i data-lucide="x"></i></button></div>
+    <div class="prose" id="whyBody"></div>
+  </div>
+</div>
+
 <!-- notice: a message that needs a Done -->
 <div class="scrim" id="ntScrim" hidden>
   <div class="sheet" role="alertdialog" aria-modal="true" aria-labelledby="ntTitle" aria-describedby="ntText">

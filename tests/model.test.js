@@ -14,9 +14,18 @@ describe("dates", () => {
 });
 
 describe("dish effort", () => {
-  it("grows ~30% per day and projects a week", () => {
-    expect(M.dishMins(dish(), T)).toEqual({ age: 0, now: 10, wk: Math.round(10 * 1.3 ** 7) });
-    expect(M.dishMins(dish({ created: ago(3) }), T).now).toBe(Math.round(10 * 1.3 ** 3));
+  it("grows ~30% per day; looks 3 days ahead while young", () => {
+    expect(M.dishMins(dish(), T)).toEqual({ age: 0, now: 10, horizon: 3, later: 22, capped: false });
+    expect(M.dishMins(dish({ created: ago(3) }), T)).toMatchObject({ now: 22, horizon: 3, later: 48 });
+  });
+  it("looks a week ahead once it has sat more than 3 days", () => {
+    expect(M.dishMins(dish({ created: ago(4) }), T)).toMatchObject({ now: 29, horizon: 7, later: 179 });
+  });
+  it("stops growing at 12 days", () => {
+    const top = Math.round(10 * 1.3 ** 12); // 233
+    expect(M.dishMins(dish({ created: ago(12) }), T)).toMatchObject({ now: top, later: top, capped: true });
+    expect(M.dishMins(dish({ created: ago(40) }), T).now).toBe(top);
+    expect(M.dishMins(dish({ created: ago(10) }), T)).toMatchObject({ later: top, capped: false });
   });
   it("never has negative age", () => {
     expect(M.dishMins(dish({ created: M.addDays(T, 2) }), T).age).toBe(0);
@@ -25,7 +34,8 @@ describe("dish effort", () => {
     const w = M.washDish(dish({ created: ago(2) }), T);
     const m = M.dishMins(dish({ created: ago(2) }), T);
     expect(w.done).toBe(T);
-    expect(w.savedMins).toBe(m.wk - m.now);
+    expect(w.savedMins).toBe(m.later - m.now); // 37 - 17 = 20, same estimate the card showed
+    expect(w.savedMins).toBe(20);
     const u = M.unwashDish(w);
     expect(u.done).toBeNull();
     expect("savedMins" in u).toBe(false);

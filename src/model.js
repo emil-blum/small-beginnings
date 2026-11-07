@@ -9,7 +9,9 @@
  */
 
 export const GROW = 1.3;            // a dish gets ~30% harder each day it sits
-export const CRUST_CAP_DAYS = 12;   // drawing stops getting crustier after this
+export const CRUST_CAP_DAYS = 12;   // after this a dish is as crusted, and as hard, as it gets
+export const SHORT_HORIZON = 3;     // estimate shown while a dish is young: "if it waits 3 more days"
+export const LONG_HORIZON = 7;      // once it has sat longer than that: "if it waits another week"
 export const WHO = ["Family", "Others", "Clients", "Me"];
 export const RHYTHMS = [1, 2, 3, 7]; // every day, every other day, "twice a week" (=3), weekly
 export const CAP_MIN = 1, CAP_MAX = 6, CAP_DEFAULT = 3;
@@ -58,17 +60,29 @@ export const isDone = (it, today) =>
 export function dishAge(it, today) {
   return Math.max(0, daysBetween(it.created, today));
 }
+/** Effort grows ~30%/day, compounding, and stops growing after CRUST_CAP_DAYS. */
+export const effortAt = (mins, days) => Math.round(mins * Math.pow(GROW, Math.min(days, CRUST_CAP_DAYS)));
+
+/**
+ * age: days in the sink. now: effort today. horizon: how far ahead the estimate looks
+ * (3 days while young, a week once it's sat longer). later: effort if it waits that long.
+ * capped: it has stopped growing.
+ */
 export function dishMins(it, today) {
   const age = dishAge(it, today);
+  const horizon = age > SHORT_HORIZON ? LONG_HORIZON : SHORT_HORIZON;
   return {
     age,
-    now: Math.round(it.mins * Math.pow(GROW, age)),
-    wk: Math.round(it.mins * Math.pow(GROW, age + 7)),
+    now: effortAt(it.mins, age),
+    horizon,
+    later: effortAt(it.mins, age + horizon),
+    capped: age >= CRUST_CAP_DAYS,
   };
 }
+/** Washing stores what it saved against the same estimate the card was showing. */
 export function washDish(it, today) {
   const m = dishMins(it, today);
-  return { ...it, done: today, savedMins: Math.max(0, m.wk - m.now) };
+  return { ...it, done: today, savedMins: Math.max(0, m.later - m.now) };
 }
 export function unwashDish(it) {
   const { savedMins, ...rest } = it;
