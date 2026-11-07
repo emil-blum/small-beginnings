@@ -13,7 +13,7 @@ import "./styles.css";
 
 import { createIcons, Sun, CookingPot, CalendarRange, Plus, Minus, X, Trash, Sparkles, Droplet,
   Check, Undo2, Heart, Users, Briefcase, User, Copy, Upload, Download, Share2, ClipboardPaste, Settings,
-  Monitor, Moon } from "lucide";
+  Monitor, Moon, Target, CirclePlus } from "lucide";
 import { registerSW } from "virtual:pwa-register";
 import * as M from "./model.js";
 import { S } from "./strings.js";
@@ -21,7 +21,7 @@ import { store, askPersist } from "./storage.js";
 import { drawPlate, readTokens } from "./draw.js";
 
 const ICONS = { Sun, CookingPot, CalendarRange, Plus, Minus, X, Trash, Sparkles, Droplet, Check, Undo2, Heart, Users,
-  Briefcase, User, Copy, Upload, Download, Share2, ClipboardPaste, Settings, Monitor, Moon };
+  Briefcase, User, Copy, Upload, Download, Share2, ClipboardPaste, Settings, Monitor, Moon, Target, CirclePlus };
 const WHO_ORDER = ["Me", "Family", "Others", "Clients"]; // display order in Week
 const WHO_ICON = { Family: "heart", Others: "users", Clients: "briefcase", Me: "user" };
 const $ = (id) => document.getElementById(id);
@@ -161,7 +161,7 @@ function render() {
       const [el] = rowShell(it, 64, "kitchenrow");
       const side = document.createElement("div");
       side.className = "side";
-      side.appendChild(btn('<i data-lucide="sun"></i>', "icon solid", () => putPlan({ ...plan(), ids: [...plan().ids, it.id] }),
+      side.appendChild(btn('<i data-lucide="circle-plus"></i>', "icon solid", () => putPlan({ ...plan(), ids: [...plan().ids, it.id] }),
         full ? { "aria-label": S.todayFull, disabled: "" } : { "aria-label": S.addToToday, title: S.addToToday }));
       side.appendChild(btn('<i data-lucide="trash"></i>', "icon", () => askRemove(it), { "aria-label": S.remove, title: S.remove }));
       el.appendChild(side);
