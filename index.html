@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Small Beginnings</title>
+<meta name="description" content="Meet tasks while they are small. Tend practices a little at a time.">
+<meta name="theme-color" content="#E6ECE5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#111714" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/icons/favicon-64.png" type="image/png">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+</head>
+<body>
+<main>
+  <!-- TODAY -->
+  <section class="view" id="v-today" aria-labelledby="t-today">
+    <div class="vhead">
+      <div class="eyebrow" id="date"></div>
+      <h1 class="title" id="t-today" data-s="todayTitle"></h1>
+      <p class="meta" data-s="todayLine"></p>
+    </div>
+    <div class="cap">
+      <div><div class="h" data-s="roomTitle"></div><div class="meta" data-s="roomLine"></div></div>
+      <div class="stepper">
+        <button class="icon" id="minus" type="button" data-s-label="roomLess"><i data-lucide="minus"></i></button>
+        <b id="capn">3</b>
+        <button class="icon" id="plus" type="button" data-s-label="roomMore"><i data-lucide="plus"></i></button>
+      </div>
+    </div>
+    <div class="list" id="todayList"></div>
+    <p class="note" id="todayNote" aria-live="polite"></p>
+  </section>
+
+  <!-- KITCHEN -->
+  <section class="view" id="v-kitchen" aria-labelledby="t-kitchen" hidden>
+    <div class="vhead">
+      <div class="eyebrow" data-s="kitchenEyebrow"></div>
+      <h1 class="title" id="t-kitchen" data-s="kitchenTitle"></h1>
+      <p class="meta" data-s="kitchenLine"></p>
+    </div>
+    <div class="sect">
+      <div class="secthead"><div class="eyebrow"><span data-s="sink"></span> <b id="sinkN"></b></div>
+        <button class="btn quiet" type="button" data-add="dish"><i data-lucide="plus"></i><span data-s="Dish"></span></button></div>
+      <div class="list" id="sink"></div>
+    </div>
+    <div class="sect">
+      <div class="secthead"><div class="eyebrow"><span data-s="sill"></span> <b id="sillN"></b></div>
+        <button class="btn quiet" type="button" data-add="seed"><i data-lucide="plus"></i><span data-s="Herb"></span></button></div>
+      <div class="list" id="sill"></div>
+    </div>
+  </section>
+
+  <!-- WEEK -->
+  <section class="view" id="v-week" aria-labelledby="t-week" hidden>
+    <div class="vhead">
+      <div class="eyebrow" data-s="weekEyebrow"></div>
+      <h1 class="title" id="t-week" data-s="weekTitle"></h1>
+    </div>
+    <div class="days" id="days"></div>
+    <div class="stats" id="stats"></div>
+    <div class="backup">
+      <div><div class="h" data-s="backupTitle"></div><p class="hint" data-s="backupLine"></p></div>
+      <div class="actions">
+        <button class="btn quiet" type="button" id="copyBk"><i data-lucide="copy"></i><span data-s="copyBackup"></span></button>
+        <button class="btn quiet" type="button" id="showRestore" aria-expanded="false" aria-controls="restoreBox"><i data-lucide="upload"></i><span data-s="restore"></span></button>
+      </div>
+      <div id="restoreBox" class="field" hidden>
+        <label class="eyebrow" for="restoreTxt" data-s="pasteBackup"></label>
+        <textarea id="restoreTxt" spellcheck="false"></textarea>
+        <div class="actions"><button class="btn primary" type="button" id="doRestore" data-s="restoreDo"></button><span class="meta" id="restoreMsg" aria-live="polite"></span></div>
+      </div>
+      <textarea id="bkFallback" readonly hidden data-s-label="backupText"></textarea>
+    </div>
+    <div class="meta" id="status"></div>
+  </section>
+</main>
+
+<nav class="tabs" aria-label="Views"><div class="in">
+  <button type="button" data-view="today"><i data-lucide="sun"></i><span data-s="navToday"></span></button>
+  <button type="button" data-view="kitchen"><i data-lucide="cooking-pot"></i><span data-s="navKitchen"></span></button>
+  <button type="button" data-view="week"><i data-lucide="calendar-range"></i><span data-s="navWeek"></span></button>
+</div></nav>
+
+<!-- add sheet -->
+<div class="scrim" id="addScrim" hidden>
+  <form class="sheet" id="addForm" role="dialog" aria-modal="true" aria-labelledby="addTitle">
+    <div class="sheethead"><h2 class="title" style="font-size:26px" id="addTitle"></h2>
+      <button class="icon" type="button" id="addClose" data-s-label="close"><i data-lucide="x"></i></button></div>
+    <div class="seg" role="group" data-s-label="kind">
+      <button type="button" id="kDish" aria-pressed="true" data-s="Dish"></button>
+      <button type="button" id="kSeed" aria-pressed="false" data-s="Herb"></button>
+    </div>
+    <p class="hint" id="kindHint"></p>
+    <div class="field"><label class="eyebrow" for="fName" data-s="fieldName"></label><input id="fName" maxlength="80" required autocomplete="off" enterkeyhint="done"></div>
+    <div class="field" id="fMinsF"><label class="eyebrow" for="fMins" data-s="fieldMins"></label><input id="fMins" type="number" min="1" max="240" value="10" inputmode="numeric"></div>
+    <div class="field" id="fRhythmF" hidden><span class="eyebrow" id="fRhythmL" data-s="fieldRhythm"></span>
+      <div class="seg wrap" role="group" aria-labelledby="fRhythmL" id="fRhythm"></div></div>
+    <div class="field"><span class="eyebrow" id="fWhoL" data-s="fieldWho"></span>
+      <div class="seg wrap" role="group" aria-labelledby="fWhoL" id="fWho"></div></div>
+    <button class="btn primary" type="submit" id="addSubmit"></button>
+  </form>
+</div>
+
+<!-- confirm sheet -->
+<div class="scrim" id="cfScrim" hidden>
+  <div class="sheet" role="alertdialog" aria-modal="true" aria-labelledby="cfTitle" aria-describedby="cfText">
+    <div class="sheethead"><h2 class="title" style="font-size:24px" id="cfTitle"></h2></div>
+    <p class="hint" id="cfText"></p>
+    <div class="actions" style="justify-content:flex-end">
+      <button class="btn quiet" type="button" id="cfNo" data-s="keep"></button>
+      <button class="btn danger" type="button" id="cfYes"><i data-lucide="trash"></i><span data-s="removeForGood"></span></button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>
