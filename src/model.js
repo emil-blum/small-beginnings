@@ -170,7 +170,22 @@ export function weekStats(items, today) {
   const total = washed.length + waters.length;
   const topEntry = Object.entries(tally).sort((a, b) => b[1] - a[1])[0];
   const top = topEntry ? { who: topEntry[0], share: Math.round((topEntry[1] / total) * 100) } : null;
-  return { perDay, washed: washed.length, saved, watered: waters.length, top };
+  return { perDay, washed: washed.length, saved, watered: waters.length, top, byWho: whoCounts(items, inWeek) };
+}
+
+/** Things done (dishes washed + herb waterings) per "who", this week and all time. */
+export function whoCounts(items, inWeek) {
+  const out = Object.fromEntries(WHO.map((w) => [w, { week: 0, all: 0 }]));
+  const add = (who, day) => {
+    const row = out[who] || out.Me;
+    row.all++;
+    if (inWeek.has(day)) row.week++;
+  };
+  items.forEach((i) => {
+    if (i.kind === "dish" && isDateKey(i.done)) add(i.who, i.done);
+    if (i.kind === "seed") (i.tended || []).forEach((d) => add(i.who, d));
+  });
+  return out;
 }
 
 /* ---------- backup ---------- */
@@ -220,4 +235,13 @@ export function mergeItems(items, incoming) {
   const map = new Map(items.map((i) => [i.id, i]));
   incoming.forEach((i) => map.set(i.id, i));
   return [...map.values()];
+}
+
+/* ---------- first install ---------- */
+/** One example dish and one example herb, so a new kitchen explains itself. */
+export function starterItems(today, names, makeId = uid) {
+  return [
+    { id: makeId(), kind: "dish", name: names.dish, who: "Family", created: today, mins: 10, example: true },
+    { id: makeId(), kind: "seed", name: names.herb, who: "Me", created: today, rhythm: 1, example: true },
+  ].map((x) => sanitizeItem(x, today, makeId));
 }

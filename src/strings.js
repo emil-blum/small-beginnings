@@ -13,7 +13,7 @@ export const S = {
   // views
   navToday: "Today", navKitchen: "Kitchen", navWeek: "Week",
   todayTitle: "Today",
-  todayLine: "Meet the difficult while it is easy. Meet the big while it is small.",
+  todayLine: "Meet the difficult while it is easy.\nMeet the big while it is small.",
   roomTitle: "Room for today", roomLine: "How much you can hold, honestly.",
   roomLess: "Room for one fewer", roomMore: "Room for one more",
   kitchenEyebrow: "Everything waiting", kitchenTitle: "Kitchen",
@@ -35,8 +35,9 @@ export const S = {
   example: "example",
   rhythm: { 1: "every day", 2: "every other day", 3: "twice a week", 7: "once a week" },
   rhythmPick: { 1: "Every day", 2: "Every other day", 3: "Twice a week", 7: "Once a week" },
-  who: { Family: "Family", Others: "Others", Clients: "Clients", Me: "Me" },
-  forWho: (w) => `For ${w === "Me" ? "me" : w.toLowerCase()}`,
+  // "Clients" is the stored key (kept so old backups load); people see "Work".
+  who: { Family: "Family", Others: "Others", Clients: "Work", Me: "Me" },
+  forWho: (w) => `For ${w === "Me" ? "me" : (S.who[w] || w).toLowerCase()}`,
 
   // today notes
   noteEmptyKitchen: "Your kitchen is empty. Add a dish or a herb in the Kitchen tab.",
@@ -46,15 +47,18 @@ export const S = {
   noteSome: (d, n) => `${d} of ${n} done.`,
 
   // kitchen empties
-  sinkClear: "The sink is clear.",
-  sinkIntro: "A dish is a one-off that hardens if left: the email you keep circling, the invoice to chase, the photos to sort.",
-  sillAllOnToday: "Every herb is on today's list.",
-  sillIntro: "A herb is a practice with a rhythm: standing practice, a few lines to each child, one honest note about the studio.",
+  sinkIntro: "A dish is a one-off task that hardens the longer you leave it undone: an email you need to send, a conversation you need to have, a promised commitment, an important to-do.",
+  sillIntro: "A herb is a practice with a rhythm to cherish: drinking water, learning a skill, a light stretch, honest reflection.",
+  sinkClear: "The sink is clear.", sinkEmpty: "Nothing in the sink yet.",
+  sillAllOnToday: "Every herb is on today's list.", sillEmpty: "Nothing on the windowsill yet.",
+
+  // first install: one example of each, so the kitchen explains itself
+  starterDish: "Pay electricity bill", starterHerb: "Daily journal entry",
 
   // add sheet
   addDish: "Add a dish", addHerb: "Add a herb", close: "Close", kind: "Kind",
   submitDish: "Put it in the sink", submitHerb: "Put it on the windowsill",
-  placeholderDish: "Reply to Alex about the template", placeholderHerb: "Standing practice",
+  placeholderDish: "Book the dentist", placeholderHerb: "Drink a glass of water",
   hintDish: "A one-off. It gets about 30% harder each day it sits in the sink.",
   hintHerb: "A practice. It grows a ring each time you water it. A pale ring appears only when a whole rhythm passes.",
   fieldName: "What is it", fieldMins: "Minutes if done today", fieldRhythm: "How often", fieldWho: "Who it helps",
@@ -68,7 +72,8 @@ export const S = {
   // week
   statWashed: "Dishes washed", statSaved: (n) => `~${n} min of future effort saved`,
   statWatered: "Herbs watered", statWateredLine: "rings grown this week",
-  statHelped: "Mostly helped", statHelpedLine: (p) => `${p}% of this week's small things`, statHelpedNone: "Nothing done yet this week",
+  statHelped: "Mostly helped",
+  whoWeek: "This week", whoAll: "All time", statHelpedLine: (p) => `${p}% of this week's small things`, statHelpedNone: "Nothing done yet this week",
 
   // settings
   settings: "Settings", settingsTitle: "Settings",
@@ -86,8 +91,9 @@ export const S = {
   restoredTitle: "Backup restored",
   restored: (n) => `${n} item${n === 1 ? " is" : "s are"} back in your kitchen. Nothing else was removed.`,
   restoreBadTitle: "Couldn't restore",
+  restoreEmptyTitle: "Nothing to restore",
+  restoreEmpty: "That backup has no items in it. Nothing was changed.",
   restoreBad: "That doesn't look like a Small Beginnings backup. Nothing was changed.",
-  done: "Done",
   version: (v, d) => `Version ${v} · ${d}`,
 
   // storage status

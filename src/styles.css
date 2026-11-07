@@ -98,7 +98,7 @@ nav.tabs svg.lucide{width:22px;height:22px}
 .scrim{position:fixed;inset:0;background:var(--scrim);z-index:40;display:grid;align-items:end;justify-items:center}
 .scrim[hidden]{display:none!important}
 .sheet{width:100%;max-width:640px;background:var(--surface);border-radius:24px 24px 0 0;
-  padding:var(--s5) max(20px,env(safe-area-inset-right,0px)) calc(var(--s5) + env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px));display:grid;gap:var(--s5);max-height:92vh;overflow:auto}
+  padding:var(--s5) max(20px,env(safe-area-inset-right,0px)) calc(var(--s5) + env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px));display:grid;gap:var(--s5);max-height:92vh;max-height:calc(100dvh - var(--s5) - env(safe-area-inset-top,0px));overflow:auto;overscroll-behavior:contain}
 .sheethead{display:flex;justify-content:space-between;align-items:center;gap:var(--s3)}
 .field{display:grid;gap:var(--s2)}
 input,select{font:inherit;font-size:16px;color:var(--ink);background:var(--raised);border:1px solid var(--line);border-radius:12px;padding:12px 14px;width:100%;min-width:0}
@@ -126,3 +126,23 @@ main{position:relative;max-width:640px;margin:0 auto}
 .setfoot{display:grid;gap:var(--s2);border-top:1px solid var(--line);padding-top:var(--s4)}
 .setfoot .hint,.setfoot .eyebrow{margin:0}
 :root[data-theme="light"]{color-scheme:light}
+
+/* v4.2 */
+/* the hidden attribute must always win: classes like .field set display and would override it */
+[hidden]{display:none!important}
+.lines{white-space:pre-line}
+.sectline{margin:0;max-width:56ch}
+/* settings is a tall sheet: always the same height, so it never looks half-open */
+.sheet.tall{height:calc(100dvh - var(--s6) - env(safe-area-inset-top,0px));align-content:start}
+body.locked{overflow:hidden}
+/* who it helped */
+.whocard{background:var(--surface);border-radius:18px;padding:var(--s4);display:grid;gap:var(--s3)}
+.whocard{gap:var(--s4)}
+.whocard .stat{padding:0}
+.whotable{border-top:1px solid var(--line);padding-top:var(--s4)}
+.whotable{display:grid;grid-template-columns:1fr auto auto;gap:var(--s3) var(--s5);align-items:center}
+.whotable .eyebrow{text-align:right}
+.whotable .n{text-align:right;font:500 17px var(--f-mono);font-variant-numeric:tabular-nums}
+.whotable .n.zero{color:var(--faint)}
+.whotable .lbl{display:inline-flex;align-items:center;gap:var(--s2);font-size:15px}
+.whotable .lbl svg.lucide{color:var(--muted)}

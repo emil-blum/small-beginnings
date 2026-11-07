@@ -20,7 +20,7 @@ try{var t=localStorage.getItem("sb-theme");if(t==="light"||t==="dark")document.d
     <div class="vhead">
       <div class="eyebrow" id="date"></div>
       <h1 class="title" id="t-today" data-s="todayTitle"></h1>
-      <p class="meta" data-s="todayLine"></p>
+      <p class="meta lines" data-s="todayLine"></p>
     </div>
     <div class="cap">
       <div><div class="h" data-s="roomTitle"></div><div class="meta" data-s="roomLine"></div></div>
@@ -44,11 +44,13 @@ try{var t=localStorage.getItem("sb-theme");if(t==="light"||t==="dark")document.d
     <div class="sect">
       <div class="secthead"><div class="eyebrow"><span data-s="sink"></span> <b id="sinkN"></b></div>
         <button class="btn quiet" type="button" data-add="dish"><i data-lucide="plus"></i><span data-s="Dish"></span></button></div>
+      <p class="meta sectline" data-s="sinkIntro"></p>
       <div class="list" id="sink"></div>
     </div>
     <div class="sect">
       <div class="secthead"><div class="eyebrow"><span data-s="sill"></span> <b id="sillN"></b></div>
         <button class="btn quiet" type="button" data-add="seed"><i data-lucide="plus"></i><span data-s="Herb"></span></button></div>
+      <p class="meta sectline" data-s="sillIntro"></p>
       <div class="list" id="sill"></div>
     </div>
   </section>
@@ -61,6 +63,7 @@ try{var t=localStorage.getItem("sb-theme");if(t==="light"||t==="dark")document.d
     </div>
     <div class="days" id="days"></div>
     <div class="stats" id="stats"></div>
+    <div class="whocard" id="whoCard"></div>
   </section>
 </main>
 
@@ -104,7 +107,7 @@ try{var t=localStorage.getItem("sb-theme");if(t==="light"||t==="dark")document.d
 
 <!-- settings sheet -->
 <div class="scrim" id="setScrim" hidden>
-  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="setTitle">
+  <div class="sheet tall" role="dialog" aria-modal="true" aria-labelledby="setTitle">
     <div class="sheethead"><h2 class="title" style="font-size:26px" id="setTitle" data-s="settingsTitle"></h2>
       <button class="icon" type="button" data-close="setScrim" data-s-label="close"><i data-lucide="x"></i></button></div>
 
@@ -151,9 +154,8 @@ try{var t=localStorage.getItem("sb-theme");if(t==="light"||t==="dark")document.d
 <div class="scrim" id="ntScrim" hidden>
   <div class="sheet" role="alertdialog" aria-modal="true" aria-labelledby="ntTitle" aria-describedby="ntText">
     <div class="sheethead"><h2 class="title" style="font-size:24px" id="ntTitle"></h2>
-      <button class="icon" type="button" data-close="ntScrim" data-s-label="close"><i data-lucide="x"></i></button></div>
+      <button class="icon" type="button" id="ntClose" data-close="ntScrim" data-s-label="close"><i data-lucide="x"></i></button></div>
     <p class="hint" id="ntText"></p>
-    <button class="btn primary" type="button" id="ntDone" data-close="ntScrim" data-s="done"></button>
   </div>
 </div>
 

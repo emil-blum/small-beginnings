@@ -22,6 +22,7 @@ import { drawPlate, readTokens } from "./draw.js";
 
 const ICONS = { Sun, CookingPot, CalendarRange, Plus, Minus, X, Trash, Sparkles, Droplet, Check, Undo2, Heart, Users,
   Briefcase, User, Copy, Upload, Download, Share2, ClipboardPaste, Settings, Monitor, Moon };
+const WHO_ORDER = ["Me", "Family", "Others", "Clients"]; // display order in Week
 const WHO_ICON = { Family: "heart", Others: "users", Clients: "briefcase", Me: "user" };
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
@@ -168,8 +169,8 @@ function render() {
     });
   };
   const anyDish = items.some((i) => i.kind === "dish"), anyHerb = items.some((i) => i.kind === "seed");
-  fill($("sink"), sink, anyDish ? S.sinkClear : S.sinkIntro);
-  fill($("sill"), sill, anyHerb ? S.sillAllOnToday : S.sillIntro);
+  fill($("sink"), sink, anyDish ? S.sinkClear : S.sinkEmpty);
+  fill($("sill"), sill, anyHerb ? S.sillAllOnToday : S.sillEmpty);
 
   week();
   settingsInfo();
@@ -184,8 +185,11 @@ function week() {
   }).join("");
   $("stats").innerHTML = `
     <div class="stat"><span class="eyebrow">${S.statWashed}</span><b>${w.washed}</b><span class="meta">${S.statSaved(w.saved)}</span></div>
-    <div class="stat"><span class="eyebrow">${S.statWatered}</span><b>${w.watered}</b><span class="meta">${S.statWateredLine}</span></div>
-    <div class="stat"><span class="eyebrow">${S.statHelped}</span><b class="word">${w.top ? esc(S.who[w.top.who]) : "—"}</b><span class="meta">${w.top ? S.statHelpedLine(w.top.share) : S.statHelpedNone}</span></div>`;
+    <div class="stat"><span class="eyebrow">${S.statWatered}</span><b>${w.watered}</b><span class="meta">${S.statWateredLine}</span></div>`;
+  const cell = (n) => `<span class="n${n ? "" : " zero"}">${n}</span>`;
+  $("whoCard").innerHTML = `<div class="stat"><span class="eyebrow">${S.statHelped}</span><b class="word">${w.top ? esc(S.who[w.top.who]) : "—"}</b><span class="meta">${w.top ? S.statHelpedLine(w.top.share) : S.statHelpedNone}</span></div>
+    <div class="whotable"><span></span><span class="eyebrow">${S.whoWeek}</span><span class="eyebrow">${S.whoAll}</span>
+    ${WHO_ORDER.map((k) => `<span class="lbl"><i data-lucide="${WHO_ICON[k]}"></i>${S.who[k]}</span>${cell(w.byWho[k].week)}${cell(w.byWho[k].all)}`).join("")}</div>`;
 }
 
 /* ---------- navigation ---------- */
@@ -215,6 +219,7 @@ function openSheet(id) {
   if (!$(id).hidden) return;
   openStack.push({ id, from: document.activeElement });
   $(id).hidden = false;
+  document.body.classList.add("locked"); // the page behind doesn't scroll
 }
 function closeSheet(id) {
   if ($(id).hidden) return;
@@ -222,6 +227,7 @@ function closeSheet(id) {
   const i = openStack.findIndex((x) => x.id === id);
   const [entry] = i < 0 ? [] : openStack.splice(i, 1);
   if (id === "cfScrim") pending = null;
+  if (!openStack.length) document.body.classList.remove("locked");
   entry?.from?.focus?.();
   maybeReload();
 }
@@ -233,7 +239,7 @@ function notice(title, text) {
   $("ntTitle").textContent = title;
   $("ntText").textContent = text;
   openSheet("ntScrim");
-  $("ntDone").focus();
+  $("ntClose").focus();
 }
 
 /* ---------- room for today ---------- */
@@ -304,7 +310,14 @@ document.querySelectorAll("#fTheme button").forEach((b) => (b.onclick = () => {
   applyTheme(t);
 }));
 applyTheme(getTheme());
-$("openSettings").onclick = () => { settingsInfo(); openSheet("setScrim"); };
+$("openSettings").onclick = () => {
+  settingsInfo();
+  // open fresh each time: paste box closed, scrolled to the top
+  $("restoreBox").hidden = true;
+  $("showRestore").setAttribute("aria-expanded", "false");
+  openSheet("setScrim");
+  $("setScrim").querySelector(".sheet").scrollTop = 0;
+};
 
 /* ---------- settings: backup ---------- */
 const backupName = () => `small-beginnings-backup-${TODAY}.json`;
@@ -343,6 +356,7 @@ $("copyBk").onclick = () => {
 async function restoreFrom(text) {
   let incoming;
   try { incoming = M.parseBackup(text, TODAY); } catch { return notice(S.restoreBadTitle, S.restoreBad); }
+  if (!incoming.length) return notice(S.restoreEmptyTitle, S.restoreEmpty);
   items = M.mergeItems(items, incoming);
   render();
   await store.putItems(items);
@@ -388,9 +402,17 @@ document.addEventListener("visibilitychange", () => { if (document.hidden && rel
 /* ---------- boot ---------- */
 (async function boot() {
   render(); // empty shell straight away
-  const { items: saved, plan: p, ok } = await store.loadAll();
+  const { items: saved, plan: p, meta, ok } = await store.loadAll();
   items = saved;
   rawPlan = p;
+  // First install: one example dish and herb. Only ever once, and never into a kitchen that has things in it.
+  if (!meta.seeded) {
+    if (!items.length) {
+      items = M.starterItems(TODAY, { dish: S.starterDish, herb: S.starterHerb });
+      await store.putItems(items);
+    }
+    await store.putMeta({ seeded: true });
+  }
   render();
   const persisted = ok && (await askPersist());
   $("status").textContent = !ok ? S.savedNowhere : persisted ? S.savedDevice : S.savedDeviceSoft;

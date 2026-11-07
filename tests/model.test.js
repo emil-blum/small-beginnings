@@ -130,6 +130,9 @@ describe("week", () => {
     expect(s.watered).toBe(2);
     expect(s.top).toEqual({ who: "Me", share: 67 });
     expect(s.perDay.at(-1)).toEqual({ day: T, n: 1 });
+    expect(s.byWho).toEqual({
+      Family: { week: 1, all: 2 }, Others: { week: 0, all: 0 }, Clients: { week: 0, all: 0 }, Me: { week: 2, all: 3 },
+    });
   });
 });
 
@@ -163,5 +166,16 @@ describe("restore", () => {
     const merged = M.mergeItems(items, [{ ...items[0], name: "Renamed" }]);
     expect(merged).toHaveLength(items.length);
     expect(merged[0].name).toBe("Renamed");
+  });
+});
+
+describe("first install", () => {
+  it("gives one example dish and one example herb, both fresh", () => {
+    let n = 0;
+    const s = M.starterItems(T, { dish: "Pay electricity bill", herb: "Daily journal entry" }, () => "s" + ++n);
+    expect(s).toEqual([
+      { id: "s1", kind: "dish", name: "Pay electricity bill", who: "Family", created: T, mins: 10, done: null, example: true },
+      { id: "s2", kind: "seed", name: "Daily journal entry", who: "Me", created: T, rhythm: 1, tended: [], example: true },
+    ]);
   });
 });
